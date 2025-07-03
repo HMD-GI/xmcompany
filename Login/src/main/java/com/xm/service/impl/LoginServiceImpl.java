@@ -1,6 +1,7 @@
 package com.xm.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xm.entity.employeeLogin;
 import com.xm.mapper.LoginMapper;
 import com.xm.result.Result;
@@ -50,5 +51,23 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, employeeLogin> im
         vo.setToken(jwt);
 
         return Result.success(vo); // 登录成功
+    }
+    
+    @Override
+    public employeeLogin getByEmployeeId(int employeeId) {
+        // 创建查询条件，根据employeeId查询登录信息
+        LambdaQueryWrapper<employeeLogin> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(employeeLogin::getEmployeeId, employeeId);
+        // 查询并返回结果
+        return this.getOne(queryWrapper);
+    }
+    
+    @Override
+    public boolean removeByEmployeeId(int employeeId) {
+        // 创建查询条件，根据employeeId删除登录信息
+        LambdaQueryWrapper<employeeLogin> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(employeeLogin::getEmployeeId, employeeId);
+        // 执行删除操作并返回是否成功
+        return this.remove(queryWrapper);
     }
 }

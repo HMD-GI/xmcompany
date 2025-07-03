@@ -16,4 +16,5 @@ public interface LoginMapper extends BaseMapper<employeeLogin> {
      */
     @Select("SELECT * FROM employee_login WHERE username = #{username}")
     employeeLogin selectBy(@Param("username") String username);
+
 }

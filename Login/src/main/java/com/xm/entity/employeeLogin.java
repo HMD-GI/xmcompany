@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class employeeLogin {
+public class employeeLogin implements Serializable {
     @TableId(type = IdType.AUTO)
     private int id; //账号表ID
-    private int employeeId; //用户ID
+    private int employeeId; //员工ID
     private String username;      // 登录用户名
     private String password;      // 登录密码（建议加密存储）
     private String role;          // 用户角色（如：ADMIN, USER 等）

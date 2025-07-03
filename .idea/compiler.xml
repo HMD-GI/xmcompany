@@ -6,9 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="employee_management" />
+        <module name="Login" />
         <module name="common" />
         <module name="web" />
-        <module name="Login" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="17" />
@@ -18,6 +19,7 @@
       <module name="Login" options="-parameters" />
       <module name="XMCompany" options="" />
       <module name="common" options="-parameters" />
+      <module name="employee_management" options="-parameters" />
       <module name="web" options="-parameters" />
     </option>
   </component>
