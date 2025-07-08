@@ -24,7 +24,7 @@ public class EmployeeController {
     @PostMapping
     public Result addEmployee(@RequestBody Employee employee) {
         if (employeeService.addEmployee(employee).getCode() == 1) {
-            return Result.success();
+            return Result.success("员工添加成功");
         }
         return Result.error("员工添加失败");
     }

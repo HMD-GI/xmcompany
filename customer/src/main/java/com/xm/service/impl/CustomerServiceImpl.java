@@ -8,6 +8,7 @@ import com.xm.mapper.CustomerMapper;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.CustomerService;
+import com.xm.utils.RedisIdGenerator;
 import com.xm.vo.CustomerVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
 
     @Autowired
     private CustomerMapper customerMapper;
+    
+    @Autowired
+    private RedisIdGenerator redisIdGenerator;
 
     /**
      * 添加客户
@@ -35,6 +39,10 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
         // 设置创建时间和更新时间
         customer.setCreateTime(LocalDateTime.now());
         customer.setUpdateTime(LocalDateTime.now());
+        
+        // 使用Redis生成ID
+        int id = redisIdGenerator.generateId("customer");
+        customer.setId(id);
         
         // 如果客户状态为0，设置默认状态为1（潜在客户）
         if (customer.getStatus() == 0) {

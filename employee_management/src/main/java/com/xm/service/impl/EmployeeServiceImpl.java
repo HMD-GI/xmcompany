@@ -10,6 +10,7 @@ import com.xm.result.Result;
 import com.xm.service.EmployeeService;
 import com.xm.page.page;
 import com.xm.service.LoginService;
+import com.xm.utils.RedisIdGenerator;
 import com.xm.vo.EmployeeVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +29,20 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
 
     @Autowired
     private LoginService loginService; // 注入 LoginService
+    
+    @Autowired
+    private RedisIdGenerator redisIdGenerator; // 注入Redis ID生成器
+    
     @Override
     @Transactional // 启用事务
     public Result addEmployee(Employee employee) {
         // 设置默认值
         employee.setCreateTime(LocalDateTime.now());
-        employee.setRole("USER"); // 默认角色为 USER
         employee.setEnabled(1); // 默认启用
+        
+        // 使用Redis生成员工ID
+        int employeeId = redisIdGenerator.generateId("employee");
+        employee.setId(employeeId);
 
         if (employeeMapper.insert(employee) > 0) {
             // 构建员工登录信息
@@ -45,14 +53,18 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
             login.setEnabled(employee.getEnabled()); // 启用状态同步
             login.setCreateTime(LocalDateTime.now()); // 创建时间
             login.setLastLoginTime(null); // 初始登录时间为 null
-            login.setEmployeeId(employee.getId()); // 设置员工ID（此时已自动生成）
+            login.setEmployeeId(employeeId); // 设置员工ID
+            
+            // 使用Redis生成登录信息ID
+            int loginId = redisIdGenerator.generateId("employeelogin");
+            login.setId(loginId);
 
             // 插入登录信息
             if (loginService.save(login)) {
                 return Result.success("员工及登录信息添加成功");
             } else {
                 // 如果登录信息保存失败，删除已插入的员工信息
-                employeeMapper.deleteById(employee.getId());
+                employeeMapper.deleteById(employeeId);
                 return Result.error("员工登录信息添加失败");
             }
         }

@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class Employee implements Serializable {
-    @TableId(type = IdType.AUTO)
-    private int id; // 员工ID
+    @TableId(type = IdType.INPUT)
+    private int id; // 员工ID，使用Redis生成
     private String name; // 员工姓名
     private String username; // 登录用户名
     private String password; // 登录密码

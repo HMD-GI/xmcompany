@@ -12,8 +12,10 @@ import java.util.List;
 
 @Data
 public class Customer implements Serializable {
-    @TableId(type = IdType.AUTO)
-    private int id; // 客户ID
+    // 修改ID生成策略为INPUT，表示ID值由外部输入，不依赖数据库自增
+    @TableId(type = IdType.INPUT)
+    private int id; // 客户ID，使用Redis生成
+    
     private String name; // 客户姓名
     private String contactPerson; // 联系人
     private String phone; // 联系电话
