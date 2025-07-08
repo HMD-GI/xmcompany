@@ -25,7 +25,9 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
   configuration:
     mapUnderscoreToCamelCase: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   type-aliases-package: com.xm.entity
+  type-handlers-package: com.xm.handler
 server:
   port: 8080
 
@@ -34,6 +36,7 @@ logging:
     org:
       springframework:
         context: DEBUG
+    com.xm: DEBUG
 
 
 
