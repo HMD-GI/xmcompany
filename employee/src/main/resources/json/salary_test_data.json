@@ -1,0 +1,172 @@
+{
+  "setEmployeeSalary": {
+    "url": "/salary/config",
+    "method": "POST",
+    "description": "设置员工薪资配置",
+    "requestBody": {
+      "employeeId": 1,
+      "bankCardNo": "6225887744556677",
+      "bankName": "中国建设银行",
+      "basicSalary": 8000.00,
+      "performanceBase": 3000.00,
+      "allowance": 1000.00,
+      "insuranceAmount": 1500.00,
+      "remark": "初始薪资配置"
+    },
+    "expectedResponse": {
+      "code": 200,
+      "message": "薪资配置设置成功"
+    }
+  },
+  
+  "getEmployeeSalary": {
+    "url": "/salary/config/1",
+    "method": "GET",
+    "description": "获取员工薪资配置",
+    "expectedResponse": {
+      "code": 200,
+      "data": {
+        "employeeId": 1,
+        "employeeName": "张三",
+        "bankCardNo": "6225****6677",
+        "bankName": "中国建设银行",
+        "basicSalary": 8000.00,
+        "performanceBase": 3000.00,
+        "allowance": 1000.00,
+        "insuranceAmount": 1500.00,
+        "totalBase": 12000.00,
+        "statusDesc": "有效"
+      }
+    }
+  },
+  
+  "generateMonthlyPayroll": {
+    "url": "/salary/payroll/generate",
+    "method": "POST",
+    "description": "生成月度工资单",
+    "requestBody": {
+      "month": "2023-10"
+    },
+    "expectedResponse": {
+      "code": 200,
+      "message": "工资单生成成功"
+    }
+  },
+  
+  "adjustPayroll": {
+    "url": "/salary/payroll/adjust",
+    "method": "PUT",
+    "description": "调整工资单",
+    "requestBody": {
+      "payrollId": 10001,
+      "performance": 3500.00,
+      "overtime": 500.00,
+      "bonus": 1000.00,
+      "remark": "月度绩效考核良好，发放绩效奖金"
+    },
+    "expectedResponse": {
+      "code": 200,
+      "message": "工资单调整成功"
+    }
+  },
+  
+  "getPayrollDetail": {
+    "url": "/salary/payroll/10001",
+    "method": "GET",
+    "description": "获取工资单详情",
+    "expectedResponse": {
+      "code": 200,
+      "data": {
+        "id": 10001,
+        "employeeId": 1,
+        "employeeName": "张三",
+        "bankCardNo": "6225****6677",
+        "bankName": "中国建设银行",
+        "payrollMonth": "2023-10",
+        "basicSalary": 8000.00,
+        "performance": 3500.00,
+        "allowance": 1000.00,
+        "overtime": 500.00,
+        "bonus": 1000.00,
+        "totalIncome": 14000.00,
+        "deduction": 0.00,
+        "insuranceAmount": 1500.00,
+        "taxableAmount": 7500.00,
+        "tax": 540.00,
+        "totalDeduction": 2040.00,
+        "actualAmount": 11960.00,
+        "statusDesc": "待发放"
+      }
+    }
+  },
+  
+  "payPayroll": {
+    "url": "/salary/payroll/pay/10001",
+    "method": "PUT",
+    "description": "发放工资",
+    "expectedResponse": {
+      "code": 200,
+      "message": "工资发放成功"
+    }
+  },
+  
+  "payAllPayrollByMonth": {
+    "url": "/salary/payroll/payall/2023-10",
+    "method": "PUT",
+    "description": "批量发放月度工资单",
+    "expectedResponse": {
+      "code": 200,
+      "message": "批量发放成功，共发放 5 笔工资"
+    }
+  },
+  
+  "getEmployeePayrollList": {
+    "url": "/salary/payroll/list/employee/1?year=2023",
+    "method": "GET",
+    "description": "查询员工工资单列表",
+    "expectedResponse": {
+      "code": 200,
+      "data": {
+        "pageSize": 10,
+        "total": 10,
+        "list": [
+          {
+            "id": 10001,
+            "employeeId": 1,
+            "employeeName": "张三",
+            "payrollMonth": "2023-10",
+            "basicSalary": 8000.00,
+            "actualAmount": 11960.00,
+            "statusDesc": "已发放",
+            "payTime": "2023-10-25 10:00:00"
+          }
+        ]
+      }
+    }
+  },
+  
+  "getMonthlyPayrollList": {
+    "url": "/salary/payroll/list/month/2023-10?status=1",
+    "method": "GET",
+    "description": "查询月度工资单列表",
+    "expectedResponse": {
+      "code": 200,
+      "data": {
+        "pageSize": 20,
+        "total": 5,
+        "list": [
+          {
+            "id": 10001,
+            "employeeId": 1,
+            "employeeName": "张三",
+            "payrollMonth": "2023-10",
+            "totalIncome": 14000.00,
+            "totalDeduction": 2040.00,
+            "actualAmount": 11960.00,
+            "statusDesc": "已发放"
+          }
+        ]
+      }
+    }
+  }
+}

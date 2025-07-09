@@ -20,7 +20,7 @@
         <module>Login</module>
         <module>common</module>
         <module>web</module>
-        <module>employee_management</module>
+        <module>employee</module>
         <module>customer</module>
     </modules>
 
