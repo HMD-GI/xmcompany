@@ -73,6 +73,11 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
      */
     private static final BigDecimal TAX_THRESHOLD = new BigDecimal("5000");
     
+    /**
+     * 设置员工薪资配置
+     * @param salaryDTO 薪资配置数据
+     * @return 设置结果
+     */
     @Override
     @Transactional
     public Result setSalary(SalaryDTO salaryDTO) {
@@ -133,6 +138,11 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
         return Result.error("薪资配置操作失败");
     }
     
+    /**
+     * 根据员工ID获取薪资配置
+     * @param employeeId 员工ID
+     * @return 薪资配置详情
+     */
     @Override
     public Result<SalaryVO> getSalaryByEmployeeId(int employeeId) {
         // 查询员工薪资配置
@@ -151,6 +161,11 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
         return Result.success(salaryVO);
     }
     
+    /**
+     * 生成月度工资单
+     * @param generationDTO 工资单生成参数，包含月份和可选的员工ID
+     * @return 生成结果
+     */
     @Override
     @Transactional
     public Result generateMonthlyPayroll(PayrollGenerationDTO generationDTO) {
@@ -251,19 +266,21 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
             }
             
             // 计算实发金额
-            payroll.setActualAmount(payroll.getBasicSalary()
-                                 .add(payroll.getPerformance())
-                                 .add(payroll.getAllowance())
-                                 .add(payroll.getOvertime())
-                                 .add(payroll.getBonus())
-                                 .subtract(payroll.getDeduction())
-                                 .subtract(payroll.getInsuranceAmount())
-                                 .subtract(payroll.getTax()));
+            BigDecimal actualAmount = payroll.getBasicSalary()
+                                    .add(payroll.getPerformance())
+                                    .add(payroll.getAllowance())
+                                    .add(payroll.getOvertime())
+                                    .add(payroll.getBonus())
+                                    .subtract(payroll.getDeduction())
+                                    .subtract(payroll.getInsuranceAmount())
+                                    .subtract(payroll.getTax());
+            
+            payroll.setActualAmount(actualAmount);
             
             // 设置状态为待发放
             payroll.setStatus(0);
             
-            // 设置时间
+            // 设置创建时间和更新时间
             LocalDateTime now = LocalDateTime.now();
             payroll.setCreateTime(now);
             payroll.setUpdateTime(now);
@@ -278,11 +295,13 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
             }
         }
         
-        if (successCount == 0 && skipCount > 0) {
-            return Result.error("无需生成工资单，所有员工已有本月工资单或缺少薪资配置");
+        if (successCount > 0) {
+            return Result.success("成功生成" + successCount + "条工资单，跳过" + skipCount + "条");
+        } else if (skipCount > 0) {
+            return Result.error("没有生成任何工资单，跳过" + skipCount + "条（已存在或无薪资配置）");
+        } else {
+            return Result.error("没有找到符合条件的员工");
         }
-        
-        return Result.success("工资单生成成功，生成数量：" + successCount + "，跳过数量：" + skipCount);
     }
     
     @Override

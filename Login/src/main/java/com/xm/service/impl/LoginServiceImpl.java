@@ -22,6 +22,12 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, employeeLogin> im
     @Autowired
     private LoginMapper loginMapper;
 
+    /**
+     * 员工登录方法
+     * @param username 用户名
+     * @param password 密码
+     * @return 登录结果，包含登录成功的用户信息和JWT令牌
+     */
     @Override
     public Result login(String username, String password) {
         // 根据用户名查询用户
@@ -53,6 +59,11 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, employeeLogin> im
         return Result.success(vo); // 登录成功
     }
     
+    /**
+     * 根据员工ID获取登录信息
+     * @param employeeId 员工ID
+     * @return 员工登录信息
+     */
     @Override
     public employeeLogin getByEmployeeId(int employeeId) {
         // 创建查询条件，根据employeeId查询登录信息
@@ -62,6 +73,11 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, employeeLogin> im
         return this.getOne(queryWrapper);
     }
     
+    /**
+     * 根据员工ID删除登录信息
+     * @param employeeId 员工ID
+     * @return 是否删除成功
+     */
     @Override
     public boolean removeByEmployeeId(int employeeId) {
         // 创建查询条件，根据employeeId删除登录信息

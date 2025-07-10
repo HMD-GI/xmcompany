@@ -62,6 +62,11 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
         LEAVE_STATUS_MAP.put(3, "已取消");
     }
 
+    /**
+     * 申请请假
+     * @param leaveApplyDTO 请假申请数据
+     * @return 申请结果
+     */
     @Override
     @Transactional
     public Result applyLeave(LeaveApplyDTO leaveApplyDTO) {
@@ -116,6 +121,11 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
         return Result.error("请假申请提交失败");
     }
 
+    /**
+     * 审核请假申请
+     * @param leaveReviewDTO 请假审核数据
+     * @return 审核结果
+     */
     @Override
     @Transactional
     public Result reviewLeave(LeaveReviewDTO leaveReviewDTO) {
@@ -150,6 +160,11 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
         return Result.error("请假审核失败");
     }
 
+    /**
+     * 根据ID获取请假详情
+     * @param id 请假ID
+     * @return 请假详情
+     */
     @Override
     public Result<LeaveVO> getLeaveById(int id) {
         // 查询请假记录
@@ -164,6 +179,14 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
         return Result.success(leaveVO);
     }
 
+    /**
+     * 获取请假列表
+     * @param currentPage 当前页码
+     * @param pageSize 每页显示数量
+     * @param employeeId 员工ID，可为空
+     * @param status 请假状态，可为空
+     * @return 请假分页列表
+     */
     @Override
     public Result<page<LeaveVO>> getLeaveList(int currentPage, int pageSize, Integer employeeId, Integer status) {
         // 创建查询条件
@@ -201,6 +224,8 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
     
     /**
      * 将Leave实体转换为LeaveVO
+     * @param leave 请假实体
+     * @return 请假VO对象
      */
     private LeaveVO convertToVO(Leave leave) {
         LeaveVO leaveVO = new LeaveVO();

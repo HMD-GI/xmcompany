@@ -23,6 +23,8 @@ public class RedisIdInitializer implements CommandLineRunner {
         redisIdGenerator.initId("employee", 1);
         redisIdGenerator.initId("employeelogin", 1);
         redisIdGenerator.initId("leave", 1); // 添加请假ID初始化
+        redisIdGenerator.initId("salary", 1); // 添加薪资配置ID初始化，起始值1000
+        redisIdGenerator.initId("payroll", 1); // 添加工资单ID初始化，起始值10000
         // 其他业务ID初始化...
         
         System.out.println("Redis ID 初始化完成");

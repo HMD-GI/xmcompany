@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
  * 薪资管理控制器
  */
 @RestController
-@RequestMapping("/salary")
+@RequestMapping("/xm/salary")
 public class SalaryController {
 
     @Autowired

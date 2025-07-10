@@ -33,6 +33,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     @Autowired
     private RedisIdGenerator redisIdGenerator; // 注入Redis ID生成器
     
+    /**
+     * 添加员工
+     * @param employee 员工信息
+     * @return 添加结果
+     */
     @Override
     @Transactional // 启用事务
     public Result addEmployee(Employee employee) {
@@ -71,6 +76,12 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return Result.error("员工添加失败");
     }
 
+    /**
+     * 更新员工状态
+     * @param id 员工ID
+     * @param enabled 启用状态：1-启用，0-禁用
+     * @return 更新结果
+     */
     @Override
     @Transactional // 启用事务
     public Result updateEmployeeStatus(int id, int enabled) {
@@ -96,6 +107,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return Result.error("状态更新失败");
     }
 
+    /**
+     * 更新员工信息
+     * @param employee 员工信息
+     * @return 更新结果
+     */
     @Override
     @Transactional // 启用事务
     public Result updateEmployee(Employee employee) {
@@ -123,6 +139,11 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return Result.error("员工信息更新失败");
     }
 
+    /**
+     * 删除员工
+     * @param id 员工ID
+     * @return 删除结果
+     */
     @Override
     @Transactional // 启用事务
     public Result deleteEmployee(int id) {
@@ -144,6 +165,12 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         return Result.error("员工删除失败");
     }
     
+    /**
+     * 获取员工列表
+     * @param currentPage 当前页码
+     * @param pageSize 每页显示数量
+     * @return 员工分页列表
+     */
     @Override
     public Result<page<EmployeeVO>> getEmployeeList(int currentPage, int pageSize) {
         // 创建MyBatis-Plus的分页对象，用于查询Employee实体
