@@ -31,6 +31,8 @@ spring:
           max-idle: 8
           min-idle: 0
           max-wait: 100ms
+    mongodb:
+      uri: mongodb://localhost:27017/xmcompany_ai_db
 
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
@@ -44,10 +46,29 @@ server:
 
 logging:
   level:
+    root: debug
     org:
       springframework:
         context: DEBUG
     com.xm: DEBUG
 
-
+#langchain4j测试模型
+langchain4j:
+  #阿里百炼平台
+  community:
+    dashscope:
+      chat-model:
+        api-key: ${DASH_SCOPE_API_KEY}
+        model-name: qwen-max
+  open-ai:
+    chat-model:
+      #DeepSeek
+      base-url: https://api.deepseek.com
+      api-key: ${DEEP_SEEK_API_KEY}
+      #DeepSeek-V3
+      model-name: deepseek-chat
+      temperture: 0.9
+      #请求和响应日志
+      log-requests: true
+      log-responses: true
 
