@@ -17,6 +17,12 @@ public class WebConfig implements WebMvcConfigurer {
        //注册自定义拦截器对象
         registry.addInterceptor(loginCheckInterceptor)
                 .addPathPatterns("/**")
-                .excludePathPatterns("/xm/login");
+                .excludePathPatterns("/xm/login")
+                .excludePathPatterns("/doc.html")
+                .excludePathPatterns("/swagger-ui.html")
+                .excludePathPatterns("/swagger-ui/**")
+                .excludePathPatterns("/webjars/**")
+                .excludePathPatterns("/swagger-resources/**")
+                .excludePathPatterns("/v3/api-docs/**"); // OpenAPI 3.0的路径
     }
 }
