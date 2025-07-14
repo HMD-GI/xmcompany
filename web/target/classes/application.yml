@@ -41,8 +41,14 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   type-aliases-package: com.xm.entity
   type-handlers-package: com.xm.handler
+
 server:
   port: 8080
+
+knife4j:
+  enable: false
+  setting:
+    language: zh_cn
 
 logging:
   level:
@@ -52,14 +58,17 @@ logging:
         context: DEBUG
     com.xm: DEBUG
 
-#langchain4j测试模型
+#langchain4j模型
 langchain4j:
-  #阿里百炼平台
+  #阿里百炼平台--通义千问
   community:
     dashscope:
-      chat-model:
+      streaming-chat-model:
         api-key: ${DASH_SCOPE_API_KEY}
-        model-name: qwen-max
+        model-name: qwen-plus
+#      chat-model:
+#        api-key: ${DASH_SCOPE_API_KEY}
+#        model-name: qwen-max
   open-ai:
     chat-model:
       #DeepSeek
