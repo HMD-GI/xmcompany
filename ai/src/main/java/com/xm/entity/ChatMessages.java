@@ -8,14 +8,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+//@AllArgsConstructor
+//@NoArgsConstructor
 @Document("chat_messages")
 public class ChatMessages {
 
-    //唯一标识，映射到 MongoDB 文档的 _id 字段
-    @Id
-    private ObjectId id;
+//    //唯一标识，映射到 MongoDB 文档的 _id 字段
+//    @Id
+//    private ObjectId id;
 
     private int messageId;
 

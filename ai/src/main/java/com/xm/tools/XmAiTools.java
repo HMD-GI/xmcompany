@@ -64,6 +64,7 @@ public class XmAiTools {
      * @param pageSize 每页显示数量
      * @return 客户列表分页数据
      */
+    @Tool(name = "查询客户列表", value = "分页查询客户列表信息")
     public Map<String, Object> queryCustomerList(int currentPage, int pageSize) {
         Map<String, Object> resultMap = new HashMap<>();
         
@@ -104,6 +105,7 @@ public class XmAiTools {
      * @param employeeId 员工ID
      * @return 员工详细信息
      */
+    @Tool(name = "查询员工信息", value = "根据员工ID查询员工详细信息")
     public Map<String, Object> queryEmployeeById(int employeeId) {
         Map<String, Object> resultMap = new HashMap<>();
         
@@ -136,6 +138,7 @@ public class XmAiTools {
      * @param pageSize 每页显示数量
      * @return 员工列表分页数据
      */
+    @Tool(name = "查询员工列表", value = "分页查询员工列表信息")
     public Map<String, Object> queryEmployeeList(int currentPage, int pageSize) {
         Map<String, Object> resultMap = new HashMap<>();
         

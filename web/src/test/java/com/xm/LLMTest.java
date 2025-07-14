@@ -29,8 +29,8 @@ public class LLMTest {
     @Test
     public void testDashScopeQwen() {
         //向模型提问
-        String answer1 = assistant.chat(1,"今天几号");
-        System.out.println(answer1);
+//        String answer1 = assistant.chat(1,"今天几号");
+//        System.out.println(answer1);
 //        String answer2 = assistant.chat(1,"我是谁");
 //        System.out.println(answer2);
 //        String answer3 = assistant.chat(2,"我是谁");
