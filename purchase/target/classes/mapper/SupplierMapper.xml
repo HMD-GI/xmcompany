@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.mapper.SupplierMapper">
+
+    <!-- 供应商VO的结果映射 -->
+    <resultMap id="SupplierVOMap" type="com.xm.vo.SupplierVO">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="contact_person" property="contactPerson"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="product_range" property="productRange"/>
+        <result column="status" property="status"/>
+        <result column="bank_account" property="bankAccount"/>
+        <result column="bank_name" property="bankName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <!-- 状态名称的计算结果 -->
+        <result column="status_name" property="statusName"/>
+    </resultMap>
+
+    <!-- 分页查询供应商列表 -->
+    <select id="selectSupplierPage" resultMap="SupplierVOMap">
+        SELECT
+            s.*,
+            CASE s.status
+                WHEN 1 THEN '合作中'
+                WHEN 2 THEN '已暂停'
+                WHEN 3 THEN '已终止'
+                ELSE '未知状态'
+            END AS status_name
+        FROM
+            supplier s
+        <where>
+            <!-- 动态拼接查询条件 -->
+            <if test="query.code != null and query.code != ''">
+                AND s.code LIKE CONCAT('%', #{query.code}, '%')
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND s.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.contactPerson != null and query.contactPerson != ''">
+                AND s.contact_person LIKE CONCAT('%', #{query.contactPerson}, '%')
+            </if>
+            <if test="query.phone != null and query.phone != ''">
+                AND s.phone LIKE CONCAT('%', #{query.phone}, '%')
+            </if>
+            <if test="query.status != null">
+                AND s.status = #{query.status}
+            </if>
+            <if test="query.productRange != null and query.productRange != ''">
+                AND s.product_range LIKE CONCAT('%', #{query.productRange}, '%')
+            </if>
+        </where>
+        ORDER BY s.create_time DESC
+    </select>
+</mapper> 

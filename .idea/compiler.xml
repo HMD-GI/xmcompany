@@ -6,11 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ai" />
-        <module name="Login" />
         <module name="common" />
-        <module name="employee" />
         <module name="web" />
+        <module name="ai" />
+        <module name="purchase" />
+        <module name="Login" />
+        <module name="employee" />
         <module name="customer" />
       </profile>
     </annotationProcessing>
@@ -27,6 +28,7 @@
       <module name="customer" options="-parameters" />
       <module name="employee" options="-parameters" />
       <module name="employee_management" options="-parameters" />
+      <module name="purchase" options="-parameters" />
       <module name="web" options="-parameters" />
     </option>
   </component>

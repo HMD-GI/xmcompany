@@ -25,6 +25,9 @@ public class RedisIdInitializer implements CommandLineRunner {
         redisIdGenerator.initId("leave", 1); // 添加请假ID初始化
         redisIdGenerator.initId("salary", 1); // 添加薪资配置ID初始化，起始值1000
         redisIdGenerator.initId("payroll", 1); // 添加工资单ID初始化，起始值10000
+        redisIdGenerator.initId("supplier", 1003); // 初始化供应商ID
+        redisIdGenerator.initId("purchase_request", 1); // 初始化采购申请ID
+        redisIdGenerator.initId("purchase_order", 1); // 初始化采购订单ID
         // 其他业务ID初始化...
         
         System.out.println("Redis ID 初始化完成");
