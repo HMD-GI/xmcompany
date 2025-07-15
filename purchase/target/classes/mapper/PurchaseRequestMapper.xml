@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.mapper.PurchaseRequestMapper">
+
+    <!-- 采购申请VO的结果映射 -->
+    <resultMap id="PurchaseRequestVOMap" type="com.xm.vo.PurchaseRequestVO">
+        <id column="id" property="id"/>
+        <result column="applicant" property="applicant"/>
+        <result column="item_name" property="itemName"/>
+        <result column="quantity" property="quantity"/>
+        <result column="budget" property="budget"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <!-- 状态名称的计算结果 -->
+        <result column="status_name" property="statusName"/>
+    </resultMap>
+
+    <!-- 分页查询采购申请列表 -->
+    <select id="selectPurchaseRequestPage" resultMap="PurchaseRequestVOMap">
+        SELECT
+            pr.*,
+            CASE pr.status
+                WHEN 0 THEN '草稿'
+                WHEN 1 THEN '审批中'
+                WHEN 2 THEN '已通过'
+                WHEN 3 THEN '已驳回'
+                WHEN 4 THEN '已撤回'
+                WHEN 5 THEN '已完成'
+                ELSE '未知状态'
+            END AS status_name
+        FROM
+            purchase_request pr
+        <where>
+            <!-- 动态拼接查询条件 -->
+            <if test="query.applicant != null and query.applicant != ''">
+                AND pr.applicant LIKE CONCAT('%', #{query.applicant}, '%')
+            </if>
+            <if test="query.itemName != null and query.itemName != ''">
+                AND pr.item_name LIKE CONCAT('%', #{query.itemName}, '%')
+            </if>
+            <if test="query.status != null">
+                AND pr.status = #{query.status}
+            </if>
+        </where>
+        ORDER BY pr.create_time DESC
+    </select>
+</mapper> 

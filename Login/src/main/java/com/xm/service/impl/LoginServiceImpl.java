@@ -50,9 +50,15 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, employeeLogin> im
         employeeLoginVO vo = new employeeLoginVO();
         BeanUtils.copyProperties(user,vo);
 
-        //生成jwt令牌
+        //生成jwt令牌，增加employeeId和role信息
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", username);
+        claims.put("employeeId", user.getEmployeeId());
+        claims.put("role", user.getRole());
+        
+        log.info("生成JWT令牌，包含用户信息：username={}, employeeId={}, role={}", 
+                username, user.getEmployeeId(), user.getRole());
+                
         String jwt = JwtUtils.generateJwt(claims);
         vo.setToken(jwt);
 

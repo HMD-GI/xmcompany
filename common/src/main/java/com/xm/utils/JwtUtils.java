@@ -45,4 +45,34 @@ public class JwtUtils {
                 .getBody();
         return claims;
     }
+    
+    /**
+     * 从JWT令牌中获取用户名
+     * @param jwt JWT令牌
+     * @return 用户名
+     */
+    public static String getUsername(String jwt) {
+        Claims claims = parseJWT(jwt);
+        return claims.get("username", String.class);
+    }
+    
+    /**
+     * 从JWT令牌中获取员工ID
+     * @param jwt JWT令牌
+     * @return 员工ID
+     */
+    public static Integer getEmployeeId(String jwt) {
+        Claims claims = parseJWT(jwt);
+        return claims.get("employeeId", Integer.class);
+    }
+    
+    /**
+     * 从JWT令牌中获取用户角色
+     * @param jwt JWT令牌
+     * @return 用户角色
+     */
+    public static String getRole(String jwt) {
+        Claims claims = parseJWT(jwt);
+        return claims.get("role", String.class);
+    }
 }

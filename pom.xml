@@ -23,6 +23,7 @@
         <module>employee</module>
         <module>customer</module>
         <module>ai</module>
+        <module>purchase</module>
     </modules>
 
 

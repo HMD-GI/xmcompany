@@ -4,6 +4,8 @@ package com.xm.Interceptor;
 import com.alibaba.fastjson.JSONObject;
 import com.xm.result.Result;
 import com.xm.utils.JwtUtils;
+import com.xm.utils.UserContext;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +47,23 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 
         //5.解析token，如果解析失败，返回错误结果（未登录）
         try {
-            JwtUtils.parseJWT(token);
-        }catch (Exception e){
-            log.info("令牌解析失败!");
+            Claims claims = JwtUtils.parseJWT(token);
+            
+            // 从JWT中获取用户信息
+            Integer employeeId = claims.get("employeeId", Integer.class);
+            String username = claims.get("username", String.class);
+            String role = claims.get("role", String.class);
+            
+            // 存入ThreadLocal
+            UserContext.UserInfo userInfo = new UserContext.UserInfo();
+            userInfo.setEmployeeId(employeeId);
+            userInfo.setUsername(username);
+            userInfo.setRole(role);
+            UserContext.setUserInfo(userInfo);
+            
+            log.info("用户信息已存入ThreadLocal, employeeId: {}, username: {}, role: {}", employeeId, username, role);
+        } catch (Exception e){
+            log.info("令牌解析失败: {}", e.getMessage());
 
             //创建响应结果对象
             Result responseResult = Result.error("NOT_LOGIN");
@@ -64,5 +80,11 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         //6.放行
         return true;
     }
-
+    
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 请求结束后，清除ThreadLocal中的用户信息，防止内存泄漏
+        UserContext.removeUserInfo();
+        HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+    }
 }
