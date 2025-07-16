@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS `purchase_order` (
   `order_no` VARCHAR(50) NOT NULL COMMENT '订单编号，业务编号',
   `supplier_id` INT NOT NULL COMMENT '供应商ID',
   `item_name` VARCHAR(100) NOT NULL COMMENT '物料名称',
+  `unit` VARCHAR(20) NOT NULL COMMENT '单位（个、件、kg等）',
   `unit_price` DECIMAL(12,2) NOT NULL COMMENT '单价',
   `quantity` INT NOT NULL COMMENT '采购数量',
   `total_amount` DECIMAL(12,2) NOT NULL COMMENT '总金额',

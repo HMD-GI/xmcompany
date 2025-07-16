@@ -12,6 +12,7 @@
         <module name="purchase" />
         <module name="Login" />
         <module name="employee" />
+        <module name="stock" />
         <module name="customer" />
       </profile>
     </annotationProcessing>
@@ -29,6 +30,7 @@
       <module name="employee" options="-parameters" />
       <module name="employee_management" options="-parameters" />
       <module name="purchase" options="-parameters" />
+      <module name="stock" options="-parameters" />
       <module name="web" options="-parameters" />
     </option>
   </component>

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS `purchase_request` (
   `id` INT PRIMARY KEY COMMENT '采购申请ID，外部生成',
   `applicant` VARCHAR(50) NOT NULL COMMENT '申请人',
   `item_name` VARCHAR(100) NOT NULL COMMENT '物料名称',
+  `unit` VARCHAR(20) NOT NULL COMMENT '单位（个、件、kg等）',
   `quantity` INT NOT NULL COMMENT '采购数量',
   `budget` DECIMAL(12,2) NOT NULL COMMENT '预算金额',
   `status` INT NOT NULL DEFAULT 0 COMMENT '采购申请状态（0:草稿, 1:审批中, 2:已通过, 3:已驳回, 4:已撤回, 5:已完成）',

@@ -27,6 +27,9 @@ public class PurchaseOrder implements Serializable {
 
     @TableField("item_name")
     private String itemName; // 物料名称
+    
+    @TableField("unit")
+    private String unit; // 单位（个、件、kg等）
 
     @TableField("unit_price")
     private BigDecimal unitPrice; // 单价

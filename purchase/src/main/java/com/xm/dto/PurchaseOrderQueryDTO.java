@@ -12,4 +12,5 @@ public class PurchaseOrderQueryDTO {
     private String itemName; // 物料名称，支持模糊查询
     private Integer status; // 采购订单状态
     private Integer purchaseRequestId; // 采购申请ID
+    private String unit; // 单位（个、件、kg等）
 } 

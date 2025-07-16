@@ -51,17 +51,17 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
             
             // 从JWT中获取用户信息
             Integer employeeId = claims.get("employeeId", Integer.class);
-            String username = claims.get("username", String.class);
+            String name = claims.get("name", String.class);
             String role = claims.get("role", String.class);
             
             // 存入ThreadLocal
             UserContext.UserInfo userInfo = new UserContext.UserInfo();
             userInfo.setEmployeeId(employeeId);
-            userInfo.setUsername(username);
+            userInfo.setName(name);
             userInfo.setRole(role);
             UserContext.setUserInfo(userInfo);
             
-            log.info("用户信息已存入ThreadLocal, employeeId: {}, username: {}, role: {}", employeeId, username, role);
+            log.info("用户信息已存入ThreadLocal, employeeId: {}, username: {}, role: {}", employeeId, name, role);
         } catch (Exception e){
             log.info("令牌解析失败: {}", e.getMessage());
 

@@ -52,6 +52,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         if (employeeMapper.insert(employee) > 0) {
             // 构建员工登录信息
             employeeLogin login = new employeeLogin();
+            login.setName(employee.getName());// 使用员工的姓名
             login.setUsername(employee.getUsername()); // 使用员工的用户名
             login.setPassword(employee.getPassword()); // 使用员工的密码
             login.setRole(employee.getRole()); // 角色同步

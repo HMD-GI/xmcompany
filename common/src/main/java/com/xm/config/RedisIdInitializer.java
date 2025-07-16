@@ -28,6 +28,8 @@ public class RedisIdInitializer implements CommandLineRunner {
         redisIdGenerator.initId("supplier", 1003); // 初始化供应商ID
         redisIdGenerator.initId("purchase_request", 1); // 初始化采购申请ID
         redisIdGenerator.initId("purchase_order", 1); // 初始化采购订单ID
+        redisIdGenerator.initId("stock", 10001);// 初始化库存ID，起始值为10001
+        redisIdGenerator.initId("stock_operation", 10001);// 初始化库存操作记录ID，起始值为10001
         // 其他业务ID初始化...
         
         System.out.println("Redis ID 初始化完成");
