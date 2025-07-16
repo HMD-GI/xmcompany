@@ -72,7 +72,10 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
             if (request.getStatus() != 2) {
                 return Result.error("只能关联已通过的采购申请");
             }
+        }else{
+            return Result.error("需要关联采购申请");
         }
+
         
         // 3. 生成订单编号（PO + 年月日 + 5位序列号）
         String orderNo = generateOrderNo();

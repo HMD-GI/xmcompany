@@ -23,6 +23,9 @@ public class PurchaseRequest implements Serializable {
 
     @TableField("item_name")
     private String itemName; // 物料名称
+    
+    @TableField("unit")
+    private String unit; // 单位（个、件、kg等）
 
     @TableField("quantity")
     private int quantity; // 采购数量

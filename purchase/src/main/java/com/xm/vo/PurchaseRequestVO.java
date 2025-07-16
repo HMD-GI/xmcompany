@@ -11,6 +11,7 @@ public class PurchaseRequestVO {
     private int id; // 采购申请ID
     private String applicant; // 申请人
     private String itemName; // 物料名称
+    private String unit; // 单位（个、件、kg等）
     private int quantity; // 采购数量
     private double budget; // 预算金额
     private int status; // 采购申请状态

@@ -10,6 +10,7 @@
         <result column="supplier_name" property="supplierName"/>
         <result column="supplier_code" property="supplierCode"/>
         <result column="item_name" property="itemName"/>
+        <result column="unit" property="unit"/>
         <result column="unit_price" property="unitPrice"/>
         <result column="quantity" property="quantity"/>
         <result column="total_amount" property="totalAmount"/>

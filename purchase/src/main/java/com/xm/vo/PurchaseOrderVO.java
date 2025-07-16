@@ -15,6 +15,7 @@ public class PurchaseOrderVO {
     private String supplierName; // 供应商名称
     private String supplierCode; // 供应商编号
     private String itemName; // 物料名称
+    private String unit; // 单位（个、件、kg等）
     private BigDecimal unitPrice; // 单价
     private int quantity; // 采购数量
     private BigDecimal totalAmount; // 总金额

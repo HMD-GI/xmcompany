@@ -57,7 +57,7 @@ public class UserContext {
      */
     public static String getCurrentUsername() {
         UserInfo userInfo = getUserInfo();
-        return userInfo != null ? userInfo.getUsername() : null;
+        return userInfo != null ? userInfo.getName() : null;
     }
     
     /**
@@ -66,7 +66,7 @@ public class UserContext {
     @Data
     public static class UserInfo {
         private Integer employeeId; // 员工ID
-        private String username; // 用户名
+        private String name; // 用户名
         private String role; // 用户角色
     }
 } 

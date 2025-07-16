@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xm.mapper.StockMapper">
+    
+    <!-- 查询库存的基本SQL -->
+    <sql id="baseStockQuery">
+        SELECT
+            s.id,
+            s.material_name AS materialName,
+            s.unit,
+            s.quantity,
+            s.last_stock_in_time AS lastStockInTime,
+            s.last_stock_out_time AS lastStockOutTime,
+            s.create_time AS createTime,
+            s.update_time AS updateTime
+        FROM
+            stock s
+    </sql>
+    
+    <!-- 分页查询库存信息 -->
+    <select id="selectStockPage" resultType="com.xm.vo.StockVO">
+        <include refid="baseStockQuery"/>
+        <where>
+            <if test="query != null">
+                <if test="query.materialName != null and query.materialName != ''">
+                    AND s.material_name LIKE CONCAT('%', #{query.materialName}, '%')
+                </if>
+            </if>
+        </where>
+        ORDER BY s.update_time DESC
+    </select>
+    
+    <!-- 根据ID查询库存详情 -->
+    <select id="selectStockById" resultType="com.xm.vo.StockVO">
+        <include refid="baseStockQuery"/>
+        WHERE s.id = #{id}
+    </select>
+    
+    <!-- 根据物料名称、单位查询库存 -->
+    <select id="selectStockByMaterialAndWarehouse" resultType="com.xm.vo.StockVO">
+        <include refid="baseStockQuery"/>
+        WHERE s.material_name = #{materialName} AND s.unit = #{unit}
+    </select>
+</mapper> 

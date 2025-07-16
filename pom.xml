@@ -24,6 +24,7 @@
         <module>customer</module>
         <module>ai</module>
         <module>purchase</module>
+        <module>stock</module>
     </modules>
 
 

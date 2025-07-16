@@ -12,6 +12,7 @@ public class employeeLogin implements Serializable {
     @TableId(type = IdType.INPUT)
     private int id; //账号表ID，使用Redis生成
     private int employeeId; //员工ID
+    private  String name;//员工姓名
     private String username;      // 登录用户名
     private String password;      // 登录密码（建议加密存储）
     private String role;          // 用户角色（如：ADMIN, USER 等）

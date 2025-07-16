@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xm.mapper.StockOperationMapper">
+    
+    <!-- 查询库存操作记录的基本SQL -->
+    <sql id="baseStockOperationQuery">
+        SELECT
+            so.id,
+            so.operation_no AS operationNo,
+            s.material_name AS materialName,
+            s.unit,
+            so.stock_id AS stockId,
+            so.operation_type AS operationType,
+            CASE so.operation_type
+                WHEN 0 THEN '入库'
+                WHEN 1 THEN '出库'
+                WHEN 2 THEN '库存调整'
+                ELSE '未知'
+            END AS operationTypeName,
+            so.quantity,
+            so.before_quantity AS beforeQuantity,
+            so.after_quantity AS afterQuantity,
+            so.operator_id AS operatorId,
+            so.operator_name AS operatorName,
+            so.remark,
+            so.operation_time AS operationTime,
+            so.create_time AS createTime
+        FROM
+            stock_operation so
+        LEFT JOIN
+            stock s ON so.stock_id = s.id
+    </sql>
+    
+    <!-- 分页查询库存操作记录 -->
+    <select id="selectStockOperationPage" resultType="com.xm.vo.StockOperationVO">
+        <include refid="baseStockOperationQuery"/>
+        <where>
+            <if test="query != null">
+                <if test="query.operationNo != null and query.operationNo != ''">
+                    AND so.operation_no LIKE CONCAT('%', #{query.operationNo}, '%')
+                </if>
+                <if test="query.materialName != null and query.materialName != ''">
+                    AND s.material_name LIKE CONCAT('%', #{query.materialName}, '%')
+                </if>
+                <if test="query.unit != null and query.unit != ''">
+                    AND s.unit = #{query.unit}
+                </if>
+                <if test="query.operationType != null">
+                    AND so.operation_type = #{query.operationType}
+                </if>
+                <if test="query.operatorId != null">
+                    AND so.operator_id = #{query.operatorId}
+                </if>
+                <if test="query.relatedOrderNo != null and query.relatedOrderNo != ''">
+                    AND so.related_order_no LIKE CONCAT('%', #{query.relatedOrderNo}, '%')
+                </if>
+                <if test="query.startTime != null">
+                    AND so.operation_time >= #{query.startTime}
+                </if>
+                <if test="query.endTime != null">
+                    AND so.operation_time &lt;= #{query.endTime}
+                </if>
+            </if>
+        </where>
+        ORDER BY so.operation_time DESC
+    </select>
+    
+    <!-- 根据ID查询库存操作记录详情 -->
+    <select id="selectStockOperationById" resultType="com.xm.vo.StockOperationVO">
+        <include refid="baseStockOperationQuery"/>
+        WHERE so.id = #{id}
+    </select>
+</mapper> 
