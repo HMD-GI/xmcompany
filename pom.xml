@@ -17,14 +17,16 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>Login</module>
-        <module>common</module>
-        <module>web</module>
-        <module>employee</module>
-        <module>customer</module>
-        <module>ai</module>
-        <module>purchase</module>
-        <module>stock</module>
+        <module>Login</module> <!--登录功能-->
+        <module>common</module> <!--共同模块-->
+        <module>web</module> <!--用于运行项目-->
+        <module>employee</module> <!--员工管理-->
+        <module>customer</module>   <!--客户功能-->
+        <module>ai</module> <!--ai助手功能-->
+        <module>purchase</module> <!--采购功能-->
+        <module>stock</module>  <!--库存功能-->
+        <module>produce</module><!--产品管理功能-->
+        <module>sale</module> <!--销售功能-->
     </modules>
 
 
