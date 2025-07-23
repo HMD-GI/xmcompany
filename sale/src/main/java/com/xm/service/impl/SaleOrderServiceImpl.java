@@ -3,15 +3,19 @@ package com.xm.service.impl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xm.dto.*;
+import com.xm.entity.Customer;
 import com.xm.entity.SaleOrder;
+import com.xm.entity.Stock;
 import com.xm.mapper.SaleOrderMapper;
 import com.xm.page.page;
 import com.xm.result.Result;
+import com.xm.service.CustomerService;
 import com.xm.service.SaleOrderService;
 import com.xm.service.StockService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.utils.UserContext;
 import com.xm.vo.SaleOrderVO;
+import com.xm.vo.StockVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +37,9 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
 
     @Autowired
     private RedisIdGenerator redisIdGenerator; // redisID生成器
+
+    @Autowired
+    private CustomerService customerService; // 引入客户服务
     
     @Autowired
     private StockService stockService; // 注入库存服务
@@ -49,10 +56,18 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         if (addDTO.getQuantity() <= 0) {
             return Result.error("订单数量必须大于0");
         }
+        // 校验客户是否存在
+        Customer customer = customerService.getById(addDTO.getCustomerId());
+        if (customer == null) {
+            return Result.error("客户不存在");
+        }
         
         // 创建销售订单对象
         SaleOrder saleOrder = new SaleOrder();
         BeanUtils.copyProperties(addDTO, saleOrder);
+
+        //添加客户名
+        saleOrder.setCustomerName(customer.getName());
         
         // 设置订单编号：SO + 当前时间戳后8位 + 3位随机数
         String timestamp = String.valueOf(System.currentTimeMillis()).substring(5);
@@ -109,12 +124,12 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
         
         // 创建更新对象
-        SaleOrder saleOrder = new SaleOrder();
+        SaleOrder saleOrder = saleOrderMapper.selectById(updateDTO.getId());
         BeanUtils.copyProperties(updateDTO, saleOrder);
-        
         // 设置更新时间
         saleOrder.setUpdateTime(LocalDateTime.now());
-        
+        // 设置订单ID
+        saleOrder.setId(updateDTO.getId());
         // 更新订单
         updateById(saleOrder);
         
@@ -148,6 +163,7 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         
         // 调用库存模块的出库接口
         StockOutDTO stockOutDTO = new StockOutDTO();
+        stockOutDTO.setStockId(stockService.getStockByProductName(existOrder.getProductName()).getId());
         stockOutDTO.setMaterialName(existOrder.getProductName());
         stockOutDTO.setUnit(existOrder.getUnit());
         stockOutDTO.setQuantity(existOrder.getQuantity());
@@ -218,4 +234,48 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         
         return Result.success(result);
     }
+
+    /**
+     * 更新订单状态
+     * @param statusUpdateDTO 状态更新信息
+     * @return Result
+     */
+    @Override
+    @Transactional
+    public Result updateSaleOrderStatus(SaleOrderStatusUpdateDTO statusUpdateDTO) {
+        // 参数校验
+        if (statusUpdateDTO.getId() <= 0) {
+            return Result.error("订单ID无效");
+        }
+
+        // 查询订单是否存在
+        SaleOrder existOrder = getById(statusUpdateDTO.getId());
+        if (existOrder == null) {
+            return Result.error("订单不存在");
+        }
+
+        // 检查订单状态，只有待处理和已确认状态的订单才能修改状态
+        if (existOrder.getStatus() > 1) {
+            return Result.error("当前订单状态不允许修改");
+        }
+        // 判断库存数量是否达到目标数量
+        StockVO stock = stockService.getStockByProductName(existOrder.getProductName());
+        if (stock == null || (statusUpdateDTO.getStatus()==1 && existOrder.getQuantity() > stock.getQuantity())){
+            return Result.error("库存数量不足");
+        }
+
+        // 创建更新对象
+        SaleOrder saleOrder = saleOrderMapper.selectById(statusUpdateDTO.getId());
+        saleOrder.setId(statusUpdateDTO.getId());
+        saleOrder.setStatus(statusUpdateDTO.getStatus());
+        saleOrder.setRemark(statusUpdateDTO.getRemark()); // 设置备注
+        saleOrder.setUpdateTime(LocalDateTime.now()); // 设置更新时间
+
+        // 更新订单状态
+        updateById(saleOrder);
+
+        log.info("订单状态更新成功，订单ID：{}，新状态：{}", statusUpdateDTO.getId(), statusUpdateDTO.getStatus());
+        return Result.success();
+    }
+
 }

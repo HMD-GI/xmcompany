@@ -41,6 +41,12 @@ public interface StockService extends IService<Stock> {
      */
     Result<StockVO> getStockById(int id);
 
+    /**
+     * 根据产品名称查询库存详情
+     * @param productName 产品名称
+     * @return Result<StockVO>
+     */
+    StockVO getStockByProductName(String productName);
 
     /**
      * 分页查询库存列表
