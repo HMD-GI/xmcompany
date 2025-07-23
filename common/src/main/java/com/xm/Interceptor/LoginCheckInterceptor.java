@@ -48,7 +48,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
         //5.解析token，如果解析失败，返回错误结果（未登录）
         try {
             // 只取Bearer后面的token部分
-            Claims claims = JwtUtils.parseJWT(token.substring(7));
+            Claims claims = JwtUtils.parseJWT(token);
             
             // 从JWT中获取用户信息
             Integer employeeId = claims.get("employeeId", Integer.class);

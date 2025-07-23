@@ -36,4 +36,11 @@ public interface StockMapper extends BaseMapper<Stock> {
      * @return StockVO 库存视图对象
      */
     StockVO selectStockByMaterialAndWarehouse(@Param("materialId") int materialId, @Param("warehouseLocation") String warehouseLocation);
-} 
+
+    /**
+     * 根据产品名称查询库存详情
+     * @param productName 产品名称
+     * @return StockVO 库存详情
+     */
+    StockVO selectStockByProductName(@Param("productName") String productName);
+}

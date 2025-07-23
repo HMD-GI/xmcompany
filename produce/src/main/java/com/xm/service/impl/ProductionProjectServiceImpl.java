@@ -10,6 +10,7 @@ import com.xm.entity.ProductionProject;
 import com.xm.mapper.ProductionProjectMapper;
 import com.xm.page.page;
 import com.xm.result.Result;
+import com.xm.service.ProductionProgressService;
 import com.xm.service.ProductionProjectService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.utils.UserContext;
@@ -33,6 +34,8 @@ public class ProductionProjectServiceImpl extends ServiceImpl<ProductionProjectM
 
     @Autowired
     private  ProductionProjectMapper productionProjectMapper;
+
+
 
     /**
      * 新增生产项目

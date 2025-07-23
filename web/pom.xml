@@ -85,6 +85,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>com.xm.XMCompamyApplication</mainClass>
+                    <jvmArguments>
+                        -Dtomcat.util.compat.COMPATIBILITY_LEVEL=17
+                    </jvmArguments>
                 </configuration>
             </plugin>
         </plugins>

@@ -1,9 +1,6 @@
 package com.xm.controller;
 
-import com.xm.dto.SaleOrderAddDTO;
-import com.xm.dto.SaleOrderQueryDTO;
-import com.xm.dto.SaleOrderShipDTO;
-import com.xm.dto.SaleOrderUpdateDTO;
+import com.xm.dto.*;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.SaleOrderService;
@@ -60,6 +57,18 @@ public class SaleOrderController {
     public Result shipSaleOrder(@RequestBody SaleOrderShipDTO shipDTO) {
         log.info("销售订单发货: {}", shipDTO);
         return saleOrderService.shipSaleOrder(shipDTO);
+    }
+
+    /**
+     * 更新订单状态
+     * @param statusUpdateDTO 状态更新信息
+     * @return Result
+     */
+    @Operation(summary = "更新订单状态", description = "修改销售订单的状态")
+    @PutMapping("/order/status")
+    public Result updateSaleOrderStatus(@RequestBody SaleOrderStatusUpdateDTO statusUpdateDTO) {
+        log.info("更新订单状态: {}", statusUpdateDTO);
+        return saleOrderService.updateSaleOrderStatus(statusUpdateDTO);
     }
 
     /**

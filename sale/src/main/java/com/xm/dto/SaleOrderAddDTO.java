@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Data
 public class SaleOrderAddDTO {
     private int customerId; // 客户ID
-    private String customerName; // 客户名称
     private String productName; // 产品名称
     private int quantity; // 数量
     private String unit; // 单位（个、件、kg等）

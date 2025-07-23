@@ -36,6 +36,9 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
     @Autowired
     private RedisIdGenerator redisIdGenerator; // 注入Redis ID生成器
 
+    @Autowired
+    private StockMapper stockMapper; // 注入StockMapper
+
     
     @Autowired
     private StockOperationService stockOperationService; // 注入库存操作记录服务
@@ -289,6 +292,20 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
         resultPage.setList(stockPage.getRecords());
         
         return Result.success(resultPage);
+    }
+
+    /**
+     * 根据产品名称查询库存详情
+     * @param productName 产品名称
+     * @return Result<StockVO>
+     */
+    @Override
+    public StockVO getStockByProductName(String productName) {
+        log.info("根据产品名称查询库存详情: {}", productName);
+
+        // 查询库存详情
+        StockVO stockVO = stockMapper.selectStockByProductName(productName);
+        return stockVO;
     }
     
     /**

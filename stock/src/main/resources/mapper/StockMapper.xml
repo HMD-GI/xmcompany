@@ -41,4 +41,10 @@
         <include refid="baseStockQuery"/>
         WHERE s.material_name = #{materialName} AND s.unit = #{unit}
     </select>
+    
+    <!-- 根据物料名称查询库存详情 -->
+    <select id="selectStockByProductName" resultType="com.xm.vo.StockVO">
+        <include refid="baseStockQuery"/>
+        WHERE s.material_name = #{productName}
+    </select>
 </mapper> 

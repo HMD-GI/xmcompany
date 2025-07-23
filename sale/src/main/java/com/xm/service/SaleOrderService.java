@@ -1,10 +1,7 @@
 package com.xm.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xm.dto.SaleOrderAddDTO;
-import com.xm.dto.SaleOrderQueryDTO;
-import com.xm.dto.SaleOrderShipDTO;
-import com.xm.dto.SaleOrderUpdateDTO;
+import com.xm.dto.*;
 import com.xm.entity.SaleOrder;
 import com.xm.page.page;
 import com.xm.result.Result;
@@ -34,6 +31,13 @@ public interface SaleOrderService extends IService<SaleOrder> {
      * @return Result
      */
     Result shipSaleOrder(SaleOrderShipDTO shipDTO);
+    
+    /**
+     * 更新订单状态
+     * @param statusUpdateDTO 状态更新信息
+     * @return Result
+     */
+    Result updateSaleOrderStatus(SaleOrderStatusUpdateDTO statusUpdateDTO);
     
     /**
      * 查询销售订单详情
