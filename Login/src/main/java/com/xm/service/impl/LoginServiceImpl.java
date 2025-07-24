@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -86,6 +87,7 @@ public class LoginServiceImpl extends ServiceImpl<LoginMapper, employeeLogin> im
      * @return 是否删除成功
      */
     @Override
+    @Transactional // 启用事务
     public boolean removeByEmployeeId(int employeeId) {
         // 创建查询条件，根据employeeId删除登录信息
         LambdaQueryWrapper<employeeLogin> queryWrapper = new LambdaQueryWrapper<>();

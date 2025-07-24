@@ -12,6 +12,7 @@ import com.xm.page.page;
 import com.xm.service.LoginService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.vo.EmployeeVO;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,9 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
     
     @Autowired
     private RedisIdGenerator redisIdGenerator; // 注入Redis ID生成器
+
+    @Autowired
+    private RedissonClient redissonClient; // 注入Redisson客户端
     
     /**
      * 添加员工
@@ -39,7 +43,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
      * @return 添加结果
      */
     @Override
-    @Transactional // 启用事务
+    @Transactional
     public Result addEmployee(Employee employee) {
         // 设置默认值
         employee.setCreateTime(LocalDateTime.now());
@@ -48,6 +52,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         // 使用Redis生成员工ID
         int employeeId = redisIdGenerator.generateId("employee");
         employee.setId(employeeId);
+
 
         if (employeeMapper.insert(employee) > 0) {
             // 构建员工登录信息
