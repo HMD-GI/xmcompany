@@ -34,7 +34,6 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
      * @return Result
      */
     @Override
-    @Transactional
     public Result addCustomer(Customer customer) {
         // 设置创建时间和更新时间
         customer.setCreateTime(LocalDateTime.now());
@@ -61,7 +60,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional //存在“先读后写”并发风险（读→校验→更新），需保证原子性。
     public Result updateCustomer(Customer customer) {
         // 检查客户是否存在
         Customer existCustomer = customerMapper.selectById(customer.getId());
@@ -84,7 +83,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional //存在“先读后写”并发风险（读→校验→更新），需保证原子性。
     public Result deleteCustomer(int id) {
         // 检查客户是否存在
         Customer customer = customerMapper.selectById(id);
