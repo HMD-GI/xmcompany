@@ -79,7 +79,7 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
      * @return 设置结果
      */
     @Override
-    @Transactional
+    @Transactional//“先读后写” 场景
     public Result setSalary(SalaryDTO salaryDTO) {
         // 验证员工是否存在
         Employee employee = employeeMapper.selectById(salaryDTO.getEmployeeId());
@@ -303,7 +303,12 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
             return Result.error("没有找到符合条件的员工");
         }
     }
-    
+
+    /**
+     * 调整工资单
+     * @param adjustmentDTO 调整信息
+     * @return Result
+     */
     @Override
     @Transactional
     public Result adjustPayroll(PayrollAdjustmentDTO adjustmentDTO) {

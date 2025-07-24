@@ -67,8 +67,8 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
      * @param leaveApplyDTO 请假申请数据
      * @return 申请结果
      */
+    //不需要加 @Transactional，因为整个流程只有一条 insert 操作，不存在多表更新或“先读后写”的并发风险。
     @Override
-    @Transactional
     public Result applyLeave(LeaveApplyDTO leaveApplyDTO) {
         // 验证员工是否存在
         Employee employee = employeeMapper.selectById(leaveApplyDTO.getEmployeeId());
@@ -127,7 +127,6 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
      * @return 审核结果
      */
     @Override
-    @Transactional
     public Result reviewLeave(LeaveReviewDTO leaveReviewDTO) {
         // 验证请假记录是否存在
         Leave leave = leaveMapper.selectById(leaveReviewDTO.getLeaveId());
