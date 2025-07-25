@@ -16,6 +16,7 @@ import com.xm.utils.RedisIdGenerator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -36,6 +37,7 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
      * @return Result
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result addPurchaseRequest(PurchaseRequest request) {
         // 通过Redis生成采购申请主键ID
         int id = redisIdGenerator.generateId("purchase_request");
@@ -55,9 +57,14 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
      * @return Result
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result updatePurchaseRequest(PurchaseRequest request) {
         // 只允许草稿或驳回状态下修改
-        PurchaseRequest old = this.getById(request.getId());
+        //PurchaseRequest old = this.getById(request.getId());
+        PurchaseRequest old = this.lambdaQuery()
+                .eq(PurchaseRequest::getId, request.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (old == null) {
             return Result.error("采购申请不存在");
         }
@@ -75,8 +82,13 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
      * @return Result
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result withdrawPurchaseRequest(int id) {
-        PurchaseRequest request = this.getById(id);
+        //PurchaseRequest request = this.getById(id);
+        PurchaseRequest request = this.lambdaQuery()
+                .eq(PurchaseRequest::getId, id)
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (request == null) {
             return Result.error("采购申请不存在");
         }
@@ -96,8 +108,13 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
      * @return Result
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result updatePurchaseRequestStatus(PurchaseRequestStatusDTO statusDTO) {
-        PurchaseRequest request = this.getById(statusDTO.getId());
+        //PurchaseRequest request = this.getById(statusDTO.getId());
+        PurchaseRequest request = this.lambdaQuery()
+                .eq(PurchaseRequest::getId, statusDTO.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (request == null) {
             return Result.error("采购申请不存在");
         }

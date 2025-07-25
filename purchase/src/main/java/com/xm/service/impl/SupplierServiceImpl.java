@@ -38,7 +38,7 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier> i
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result addSupplier(Supplier supplier) {
         // 校验供应商编号是否已存在
         LambdaQueryWrapper<Supplier> queryWrapper = new LambdaQueryWrapper<>();
@@ -68,7 +68,7 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier> i
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updateSupplier(Supplier supplier) {
         // 校验供应商是否存在
         Supplier existingSupplier = this.getById(supplier.getId());
@@ -106,7 +106,7 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier> i
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result deleteSupplier(int id) {
         // 校验供应商是否存在
         if (!this.getBaseMapper().exists(new LambdaQueryWrapper<Supplier>().eq(Supplier::getId, id))) {
@@ -177,7 +177,7 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier> i
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updateSupplierStatus(SupplierStatusDTO statusDTO) {
         // 校验状态值
         if (statusDTO.getStatus() < 1 || statusDTO.getStatus() > 3) {
@@ -185,7 +185,11 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier> i
         }
         
         // 校验供应商是否存在
-        Supplier supplier = this.getById(statusDTO.getId());
+        //Supplier supplier = this.getById(statusDTO.getId());
+        Supplier supplier = this.lambdaQuery()
+                .eq(Supplier::getId, statusDTO.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (supplier == null) {
             return Result.error("供应商不存在");
         }

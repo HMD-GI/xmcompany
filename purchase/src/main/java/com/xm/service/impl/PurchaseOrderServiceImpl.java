@@ -53,7 +53,7 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result addPurchaseOrder(PurchaseOrder order) {
         // 1. 校验供应商是否存在
         Supplier supplier = supplierService.getById(order.getSupplierId());
@@ -105,10 +105,15 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updatePurchaseOrder(PurchaseOrder order) {
         // 1. 校验采购订单是否存在
-        PurchaseOrder existingOrder = this.getById(order.getId());
+        //PurchaseOrder existingOrder = this.getById(order.getId());
+        // 行锁读取
+        PurchaseOrder existingOrder = this.lambdaQuery()
+                .eq(PurchaseOrder::getId, order.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (existingOrder == null) {
             return Result.error("采购订单不存在");
         }
@@ -159,10 +164,14 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result cancelPurchaseOrder(int id) {
         // 1. 校验采购订单是否存在
-        PurchaseOrder order = this.getById(id);
+        //PurchaseOrder order = this.getById(id);
+        PurchaseOrder order = this.lambdaQuery()
+                .eq(PurchaseOrder::getId, id)
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (order == null) {
             return Result.error("采购订单不存在");
         }
@@ -191,7 +200,7 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updatePurchaseOrderStatus(PurchaseOrderStatusDTO statusDTO) {
         // 1. 校验状态值
         if (statusDTO.getStatus() < 0 || statusDTO.getStatus() > 5) {
@@ -199,7 +208,11 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
         }
         
         // 2. 校验采购订单是否存在
-        PurchaseOrder order = this.getById(statusDTO.getId());
+        //PurchaseOrder order = this.getById(statusDTO.getId());
+        PurchaseOrder order = this.lambdaQuery()
+                .eq(PurchaseOrder::getId, statusDTO.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (order == null) {
             return Result.error("采购订单不存在");
         }
