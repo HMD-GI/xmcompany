@@ -50,7 +50,7 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result addSaleOrder(SaleOrderAddDTO addDTO) {
         // 参数校验
         if (addDTO.getQuantity() <= 0) {
@@ -102,7 +102,7 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updateSaleOrder(SaleOrderUpdateDTO updateDTO) {
         // 参数校验
         if (updateDTO.getId() <= 0) {
@@ -113,7 +113,11 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
         
         // 查询订单是否存在
-        SaleOrder existOrder = getById(updateDTO.getId());
+        //SaleOrder existOrder = getById(updateDTO.getId());
+        SaleOrder existOrder = this.lambdaQuery()
+                .eq(SaleOrder::getId, updateDTO.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (existOrder == null) {
             return Result.error("订单不存在");
         }
@@ -124,14 +128,14 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
         
         // 创建更新对象
-        SaleOrder saleOrder = saleOrderMapper.selectById(updateDTO.getId());
-        BeanUtils.copyProperties(updateDTO, saleOrder);
+        //SaleOrder saleOrder = saleOrderMapper.selectById(updateDTO.getId());
+        BeanUtils.copyProperties(updateDTO, existOrder);
         // 设置更新时间
-        saleOrder.setUpdateTime(LocalDateTime.now());
+        existOrder.setUpdateTime(LocalDateTime.now());
         // 设置订单ID
-        saleOrder.setId(updateDTO.getId());
+        existOrder.setId(updateDTO.getId());
         // 更新订单
-        updateById(saleOrder);
+        updateById(existOrder);
         
         log.info("更新销售订单成功，订单ID：{}", updateDTO.getId());
         return Result.success();
@@ -143,7 +147,7 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result shipSaleOrder(SaleOrderShipDTO shipDTO) {
         // 参数校验
         if (shipDTO.getId() <= 0) {
@@ -151,7 +155,11 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
         
         // 查询订单是否存在
-        SaleOrder existOrder = getById(shipDTO.getId());
+        //SaleOrder existOrder = getById(shipDTO.getId());
+        SaleOrder existOrder = this.lambdaQuery()
+                .eq(SaleOrder::getId, shipDTO.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (existOrder == null) {
             return Result.error("订单不存在");
         }
@@ -176,15 +184,15 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
         
         // 更新订单状态为已发货
-        SaleOrder saleOrder = new SaleOrder();
-        saleOrder.setId(shipDTO.getId());
-        saleOrder.setStatus(2); // 设置状态为已发货
-        saleOrder.setShippingTime(LocalDateTime.now()); // 设置发货时间
-        saleOrder.setRemark(shipDTO.getRemark()); // 设置备注
-        saleOrder.setUpdateTime(LocalDateTime.now()); // 设置更新时间
+        //SaleOrder saleOrder = new SaleOrder();
+        existOrder.setId(shipDTO.getId());
+        existOrder.setStatus(2); // 设置状态为已发货
+        existOrder.setShippingTime(LocalDateTime.now()); // 设置发货时间
+        existOrder.setRemark(shipDTO.getRemark()); // 设置备注
+        existOrder.setUpdateTime(LocalDateTime.now()); // 设置更新时间
         
         // 更新订单
-        updateById(saleOrder);
+        updateById(existOrder);
         
         log.info("销售订单发货成功，订单ID：{}", shipDTO.getId());
         return Result.success();
@@ -241,7 +249,7 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updateSaleOrderStatus(SaleOrderStatusUpdateDTO statusUpdateDTO) {
         // 参数校验
         if (statusUpdateDTO.getId() <= 0) {
@@ -249,7 +257,11 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
 
         // 查询订单是否存在
-        SaleOrder existOrder = getById(statusUpdateDTO.getId());
+        //SaleOrder existOrder = getById(statusUpdateDTO.getId());
+        SaleOrder existOrder = this.lambdaQuery()
+                .eq(SaleOrder::getId, statusUpdateDTO.getId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
         if (existOrder == null) {
             return Result.error("订单不存在");
         }
@@ -265,14 +277,14 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
 
         // 创建更新对象
-        SaleOrder saleOrder = saleOrderMapper.selectById(statusUpdateDTO.getId());
-        saleOrder.setId(statusUpdateDTO.getId());
-        saleOrder.setStatus(statusUpdateDTO.getStatus());
-        saleOrder.setRemark(statusUpdateDTO.getRemark()); // 设置备注
-        saleOrder.setUpdateTime(LocalDateTime.now()); // 设置更新时间
+        //SaleOrder saleOrder = saleOrderMapper.selectById(statusUpdateDTO.getId());
+        //existOrder.setId(statusUpdateDTO.getId());
+        existOrder.setStatus(statusUpdateDTO.getStatus());
+        existOrder.setRemark(statusUpdateDTO.getRemark()); // 设置备注
+        existOrder.setUpdateTime(LocalDateTime.now()); // 设置更新时间
 
         // 更新订单状态
-        updateById(saleOrder);
+        updateById(existOrder);
 
         log.info("订单状态更新成功，订单ID：{}，新状态：{}", statusUpdateDTO.getId(), statusUpdateDTO.getStatus());
         return Result.success();

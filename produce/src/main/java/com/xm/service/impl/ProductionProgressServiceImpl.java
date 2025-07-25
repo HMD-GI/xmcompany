@@ -35,6 +35,9 @@ public class ProductionProgressServiceImpl extends ServiceImpl<ProductionProgres
     
     @Autowired
     private ProductionProjectService productionProjectService; // 注入生产项目服务
+
+    @Autowired
+    private ProductionProgressMapper productionProgressMapper; // 注入生产进度Mapper
     
     @Autowired
     private StockService stockService; // 注入库存服务
@@ -45,7 +48,7 @@ public class ProductionProgressServiceImpl extends ServiceImpl<ProductionProgres
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updateProgress(ProductionProgressUpdateDTO progressUpdateDTO) {
         log.info("更新生产进度: {}", progressUpdateDTO);
         

@@ -12,6 +12,7 @@ import com.xm.service.StockOperationService;
 import com.xm.vo.StockOperationVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 库存操作记录服务实现类
@@ -26,6 +27,7 @@ public class StockOperationServiceImpl extends ServiceImpl<StockOperationMapper,
      * @return Result
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result addStockOperation(StockOperation stockOperation) {
         log.info("添加库存操作记录: {}", stockOperation);
         

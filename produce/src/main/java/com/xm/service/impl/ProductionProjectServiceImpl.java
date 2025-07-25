@@ -88,12 +88,17 @@ public class ProductionProjectServiceImpl extends ServiceImpl<ProductionProjectM
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updateProjectStatus(ProductionStatusUpdateDTO statusUpdateDTO) {
         log.info("更新项目状态: {}", statusUpdateDTO);
-        
+
+        // 1. 加行锁读取
+        ProductionProject project = this.lambdaQuery()
+                .eq(ProductionProject::getId, statusUpdateDTO.getProjectId())
+                .last("LIMIT 1 FOR UPDATE")
+                .one();
+
         // 检查项目是否存在
-        ProductionProject project = this.getById(statusUpdateDTO.getProjectId());
         if (project == null) {
             return Result.error("生产项目不存在");
         }

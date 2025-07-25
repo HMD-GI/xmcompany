@@ -18,6 +18,8 @@ import com.xm.utils.RedisIdGenerator;
 import com.xm.utils.UserContext;
 import com.xm.vo.StockVO;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,9 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
 
     @Autowired
     private RedisIdGenerator redisIdGenerator; // 注入Redis ID生成器
+    @Autowired
+    private RedissonClient redissonClient;   // 注入 Redisson
+
 
     @Autowired
     private StockMapper stockMapper; // 注入StockMapper
@@ -52,7 +57,7 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result stockIn(StockInDTO stockInDTO) {
         log.info("入库操作: {}", stockInDTO);
 
@@ -68,61 +73,81 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
         if (operatorId == null || operatorName == null) {
             return Result.error("无法获取操作人信息");
         }
-        
-        // 查询物料是否已有库存记录（只用物料名称唯一）
-        LambdaQueryWrapper<Stock> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Stock::getMaterialName, stockInDTO.getMaterialName());
-        Stock stock = this.getOne(queryWrapper);
-        
-        // 生成操作编号
-        String operationNo = generateOperationNo("IN");
-        LocalDateTime now = LocalDateTime.now();
-        
-        int beforeQuantity = 0;
-        int afterQuantity;
-        
-        // 如果没有库存记录，则创建新的库存记录
-        if (stock == null) {
-            stock = new Stock();
-            stock.setId(redisIdGenerator.generateId("stock"));
-            stock.setMaterialName(stockInDTO.getMaterialName()); // 设置物料名称
-            stock.setUnit(stockInDTO.getUnit()); // 设置单位
-            stock.setQuantity(stockInDTO.getQuantity());
-            stock.setLastStockInTime(now);
-            stock.setCreateTime(now);
-            stock.setUpdateTime(now);
-            this.save(stock);
-            
-            afterQuantity = stockInDTO.getQuantity();
-        } else {
-            // 已有库存记录，更新库存数量
-            beforeQuantity = stock.getQuantity();
-            afterQuantity = beforeQuantity + stockInDTO.getQuantity();
-            
-            stock.setQuantity(afterQuantity);
-            stock.setLastStockInTime(now);
-            stock.setUpdateTime(now);
-            
-            this.updateById(stock);
+
+        // 创建锁对象
+        RLock lock = redissonClient.getLock("lock:stockIn:" + stockInDTO.getMaterialName());
+        //获取锁对象
+        boolean isLock = lock.tryLock();
+        if (!isLock) {
+            // 获取锁失败，等待3秒重试
+            try {
+                Thread.sleep(3000);
+                stockIn(stockInDTO);
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
         }
-        
-        // 记录入库操作
-        StockOperation operation = new StockOperation();
-        operation.setId(redisIdGenerator.generateId("stock_operation"));
-        operation.setOperationNo(operationNo);
-        operation.setStockId(stock.getId());
-        operation.setOperationType(0); // 0:入库
-        operation.setQuantity(stockInDTO.getQuantity());
-        operation.setBeforeQuantity(beforeQuantity);
-        operation.setAfterQuantity(afterQuantity);
-        operation.setOperatorId(operatorId);
-        operation.setOperatorName(operatorName);
-        operation.setRemark(stockInDTO.getRemark());
-        operation.setOperationTime(now);
-        operation.setCreateTime(now);
-        
-        stockOperationService.addStockOperation(operation);
-        
+
+        try {
+            // 查询物料是否已有库存记录（只用物料名称唯一）
+            LambdaQueryWrapper<Stock> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Stock::getMaterialName, stockInDTO.getMaterialName()).last("LIMIT 1 FOR UPDATE");
+            Stock stock = this.getOne(queryWrapper);
+
+            // 生成操作编号
+            String operationNo = generateOperationNo("IN");
+            LocalDateTime now = LocalDateTime.now();
+
+            int beforeQuantity = 0;
+            int afterQuantity;
+
+            // 如果没有库存记录，则创建新的库存记录
+            if (stock == null) {
+                stock = new Stock();
+                stock.setId(redisIdGenerator.generateId("stock"));
+                stock.setMaterialName(stockInDTO.getMaterialName()); // 设置物料名称
+                stock.setUnit(stockInDTO.getUnit()); // 设置单位
+                stock.setQuantity(stockInDTO.getQuantity());
+                stock.setLastStockInTime(now);
+                stock.setCreateTime(now);
+                stock.setUpdateTime(now);
+                this.save(stock);
+
+                afterQuantity = stockInDTO.getQuantity();
+            } else {
+                // 已有库存记录，更新库存数量
+                beforeQuantity = stock.getQuantity();
+                afterQuantity = beforeQuantity + stockInDTO.getQuantity();
+
+                stock.setQuantity(afterQuantity);
+                stock.setLastStockInTime(now);
+                stock.setUpdateTime(now);
+
+                this.updateById(stock);
+            }
+
+            // 记录入库操作
+            StockOperation operation = new StockOperation();
+            operation.setId(redisIdGenerator.generateId("stock_operation"));
+            operation.setOperationNo(operationNo);
+            operation.setStockId(stock.getId());
+            operation.setOperationType(0); // 0:入库
+            operation.setQuantity(stockInDTO.getQuantity());
+            operation.setBeforeQuantity(beforeQuantity);
+            operation.setAfterQuantity(afterQuantity);
+            operation.setOperatorId(operatorId);
+            operation.setOperatorName(operatorName);
+            operation.setRemark(stockInDTO.getRemark());
+            operation.setOperationTime(now);
+            operation.setCreateTime(now);
+
+            stockOperationService.addStockOperation(operation);
+        }catch (Exception e) {
+            log.error("入库操作失败: {}", e.getMessage());
+            return Result.error("入库操作失败: " + e.getMessage());
+        }finally {
+            lock.unlock();
+        }
         return Result.success();
     }
 
@@ -132,64 +157,85 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result stockOut(StockOutDTO stockOutDTO) {
         log.info("出库操作: {}", stockOutDTO);
-        
-        // 检查出库数量是否有效
-        if (stockOutDTO.getQuantity() <= 0) {
-            return Result.error("出库数量必须大于0");
+
+        RLock lock = redissonClient.getLock("lock:stockOut:" + stockOutDTO.getMaterialName());
+        boolean isLock = lock.tryLock();
+        if (!isLock) {
+            try {
+                Thread.sleep(3000);
+                stockOut(stockOutDTO);
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
         }
-        
-        // 获取用户上下文信息
-        Integer operatorId = UserContext.getCurrentEmployeeId();
-        String operatorName = UserContext.getCurrentUsername();
-        if (operatorId == null || operatorName == null) {
-            return Result.error("无法获取操作人信息");
+
+        try {
+            // 检查出库数量是否有效
+            if (stockOutDTO.getQuantity() <= 0) {
+                return Result.error("出库数量必须大于0");
+            }
+
+            // 获取用户上下文信息
+            Integer operatorId = UserContext.getCurrentEmployeeId();
+            String operatorName = UserContext.getCurrentUsername();
+            if (operatorId == null || operatorName == null) {
+                return Result.error("无法获取操作人信息");
+            }
+
+            // 查询库存记录
+            //Stock stock = this.getById(stockOutDTO.getStockId());
+            Stock stock = this.lambdaQuery()
+                    .eq(Stock::getId, stockOutDTO.getStockId())
+                    .last("LIMIT 1 FOR UPDATE")
+                    .one();
+            if (stock == null) {
+                return Result.error("库存记录不存在");
+            }
+
+            // 检查库存数量是否足够
+            if (stock.getQuantity() < stockOutDTO.getQuantity()) {
+                return Result.error("库存不足");
+            }
+
+            // 生成操作编号
+            String operationNo = generateOperationNo("OUT");
+            LocalDateTime now = LocalDateTime.now();
+
+            // 更新库存数量
+            int beforeQuantity = stock.getQuantity();
+            int afterQuantity = beforeQuantity - stockOutDTO.getQuantity();
+
+            stock.setQuantity(afterQuantity);
+            stock.setLastStockOutTime(now);
+            stock.setUpdateTime(now);
+
+            this.updateById(stock);
+
+            // 记录出库操作
+            StockOperation operation = new StockOperation();
+            operation.setId(redisIdGenerator.generateId("stock_operation"));
+            operation.setOperationNo(operationNo);
+            operation.setStockId(stock.getId());
+            operation.setOperationType(1); // 1:出库
+            operation.setQuantity(stockOutDTO.getQuantity());
+            operation.setBeforeQuantity(beforeQuantity);
+            operation.setAfterQuantity(afterQuantity);
+            operation.setOperatorId(operatorId);
+            operation.setOperatorName(operatorName);
+            operation.setRemark(stockOutDTO.getRemark());
+            operation.setOperationTime(now);
+            operation.setCreateTime(now);
+
+            stockOperationService.addStockOperation(operation);
+        }catch (Exception e) {
+            log.error("出库操作失败: {}", e.getMessage());
+            return Result.error("出库操作失败: " + e.getMessage());
+        }finally {
+            lock.unlock();
         }
-        
-        // 查询库存记录
-        Stock stock = this.getById(stockOutDTO.getStockId());
-        if (stock == null) {
-            return Result.error("库存记录不存在");
-        }
-        
-        // 检查库存数量是否足够
-        if (stock.getQuantity() < stockOutDTO.getQuantity()) {
-            return Result.error("库存不足");
-        }
-        
-        // 生成操作编号
-        String operationNo = generateOperationNo("OUT");
-        LocalDateTime now = LocalDateTime.now();
-        
-        // 更新库存数量
-        int beforeQuantity = stock.getQuantity();
-        int afterQuantity = beforeQuantity - stockOutDTO.getQuantity();
-        
-        stock.setQuantity(afterQuantity);
-        stock.setLastStockOutTime(now);
-        stock.setUpdateTime(now);
-        
-        this.updateById(stock);
-        
-        // 记录出库操作
-        StockOperation operation = new StockOperation();
-        operation.setId(redisIdGenerator.generateId("stock_operation"));
-        operation.setOperationNo(operationNo);
-        operation.setStockId(stock.getId());
-        operation.setOperationType(1); // 1:出库
-        operation.setQuantity(stockOutDTO.getQuantity());
-        operation.setBeforeQuantity(beforeQuantity);
-        operation.setAfterQuantity(afterQuantity);
-        operation.setOperatorId(operatorId);
-        operation.setOperatorName(operatorName);
-        operation.setRemark(stockOutDTO.getRemark());
-        operation.setOperationTime(now);
-        operation.setCreateTime(now);
-        
-        stockOperationService.addStockOperation(operation);
-        
         return Result.success();
     }
 
@@ -199,7 +245,7 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
      * @return Result
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Result updateStock(Stock stock) {
         log.info("更新库存信息: {}", stock);
         
