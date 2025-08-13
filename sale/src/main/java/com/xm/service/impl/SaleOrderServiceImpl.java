@@ -15,6 +15,7 @@ import com.xm.service.StockService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.utils.UserContext;
 import com.xm.vo.SaleOrderVO;
+import com.xm.vo.SimpleSaleOrderVO;
 import com.xm.vo.StockVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -23,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * 销售订单服务实现类
@@ -227,18 +230,25 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
      * @return Result<page<SaleOrderVO>>
      */
     @Override
-    public Result<page<SaleOrderVO>> getSaleOrderList(int currentPage, int pageSize, SaleOrderQueryDTO queryDTO) {
+    public Result<page<SimpleSaleOrderVO>> getSaleOrderList(int currentPage, int pageSize, SaleOrderQueryDTO queryDTO) {
         // 创建分页对象
         Page<SaleOrder> page = new Page<>(currentPage, pageSize);
         
         // 执行分页查询
         Page<SaleOrderVO> voPage = saleOrderMapper.selectSaleOrderPage(page, queryDTO);
+
+        //转换为SimpleSaleOrderVO对象
+        List<SimpleSaleOrderVO> vos = voPage.getRecords().stream().map(saleOrder -> {
+            SimpleSaleOrderVO vo = new SimpleSaleOrderVO();
+            BeanUtils.copyProperties(saleOrder, vo);
+            return vo;
+        }).collect(Collectors.toList());
         
         // 封装返回结果
-        page<SaleOrderVO> result = new page<>();
+        page<SimpleSaleOrderVO> result = new page<>();
         result.setPageSize(pageSize);
         result.setTotal((int) voPage.getTotal());
-        result.setList(voPage.getRecords());
+        result.setList(vos);
         
         return Result.success(result);
     }

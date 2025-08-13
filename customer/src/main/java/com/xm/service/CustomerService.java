@@ -33,7 +33,7 @@ public interface CustomerService extends IService<Customer> {
      * @param id 客户ID
      * @return Result<CustomerVO> 客户详情
      */
-    Result<CustomerVO> getCustomerById(int id);
+    Result<Customer> getCustomerById(int id);
     
     /**
      * 分页查询客户列表

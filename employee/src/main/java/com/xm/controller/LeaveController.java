@@ -2,6 +2,7 @@ package com.xm.controller;
 
 import com.xm.dto.LeaveApplyDTO;
 import com.xm.dto.LeaveReviewDTO;
+import com.xm.entity.Leave;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.LeaveService;
@@ -55,7 +56,7 @@ public class LeaveController {
      */
     @Operation(summary = "查询请假详情", description = "根据请假记录ID查询请假的详细信息")
     @GetMapping("/{id}")
-    public Result<LeaveVO> getLeaveById(@PathVariable int id) {
+    public Result<Leave> getLeaveById(@PathVariable int id) {
         log.info("查询请假详情：{}", id);
         return leaveService.getLeaveById(id);
     }

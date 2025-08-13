@@ -7,6 +7,7 @@ import com.xm.entity.PurchaseOrder;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.vo.PurchaseOrderVO;
+import com.xm.vo.SimplePurchaseOrderVO;
 
 /**
  * 采购订单服务接口
@@ -54,5 +55,5 @@ public interface PurchaseOrderService extends IService<PurchaseOrder> {
      * @param queryDTO 查询条件
      * @return Result<page<PurchaseOrderVO>>
      */
-    Result<page<PurchaseOrderVO>> getPurchaseOrderList(int currentPage, int pageSize, PurchaseOrderQueryDTO queryDTO);
+    Result<page<SimplePurchaseOrderVO>> getPurchaseOrderList(int currentPage, int pageSize, PurchaseOrderQueryDTO queryDTO);
 } 

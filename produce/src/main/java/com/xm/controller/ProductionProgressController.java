@@ -5,6 +5,7 @@ import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.ProductionProgressService;
 import com.xm.vo.ProductionProgressVO;
+import com.xm.vo.ProgressVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +57,7 @@ public class ProductionProgressController {
      */
     @Operation(summary = "分页查询进度记录", description = "根据项目ID分页查询生产进度记录列表")
     @GetMapping("/list/{projectId}")
-    public Result<page<ProductionProgressVO>> getProgressList(
+    public Result<page<ProgressVO>> getProgressList(
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
             @PathVariable int projectId) {

@@ -38,9 +38,6 @@
             <if test="query.orderNo != null and query.orderNo != ''">
                 AND so.order_no LIKE CONCAT('%', #{query.orderNo}, '%')
             </if>
-            <if test="query.customerId != null">
-                AND so.customer_id = #{query.customerId}
-            </if>
             <if test="query.customerName != null and query.customerName != ''">
                 AND so.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
             </if>

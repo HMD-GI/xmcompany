@@ -3,6 +3,7 @@ package com.xm.controller;
 import com.xm.dto.PayrollAdjustmentDTO;
 import com.xm.dto.PayrollGenerationDTO;
 import com.xm.dto.SalaryDTO;
+import com.xm.entity.Payroll;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.SalaryService;
@@ -83,7 +84,7 @@ public class SalaryController {
      */
     @Operation(summary = "获取工资单详情", description = "根据工资单ID查询工资单详细信息")
     @GetMapping("/payroll/{payrollId}")
-    public Result<PayrollVO> getPayrollDetail(@PathVariable int payrollId) {
+    public Result<Payroll> getPayrollDetail(@PathVariable int payrollId) {
         return salaryService.getPayrollById(payrollId);
     }
     

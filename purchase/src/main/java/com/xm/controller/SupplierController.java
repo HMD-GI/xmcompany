@@ -6,6 +6,7 @@ import com.xm.entity.Supplier;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.SupplierService;
+import com.xm.vo.SimpleSupplierVO;
 import com.xm.vo.SupplierVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -82,7 +83,7 @@ public class SupplierController {
      */
     @Operation(summary = "分页查询供应商", description = "根据条件分页查询供应商列表")
     @GetMapping("/list")
-    public Result<page<SupplierVO>> getSupplierList(
+    public Result<page<SimpleSupplierVO>> getSupplierList(
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
             SupplierQueryDTO queryDTO) {

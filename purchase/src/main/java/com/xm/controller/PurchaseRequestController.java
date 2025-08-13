@@ -7,6 +7,7 @@ import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.PurchaseRequestService;
 import com.xm.vo.PurchaseRequestVO;
+import com.xm.vo.SimplePurchaseRequestVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -94,7 +95,7 @@ public class PurchaseRequestController {
      */
     @Operation(summary = "分页查询采购申请", description = "根据条件分页查询采购申请列表")
     @GetMapping("/list")
-    public Result<page<PurchaseRequestVO>> getPurchaseRequestList(
+    public Result<page<SimplePurchaseRequestVO>> getPurchaseRequestList(
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
             PurchaseRequestQueryDTO queryDTO) {

@@ -6,6 +6,7 @@ import com.xm.entity.SaleOrder;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.vo.SaleOrderVO;
+import com.xm.vo.SimpleSaleOrderVO;
 
 /**
  * 销售订单服务接口
@@ -53,5 +54,5 @@ public interface SaleOrderService extends IService<SaleOrder> {
      * @param queryDTO 查询条件
      * @return Result<page<SaleOrderVO>>
      */
-    Result<page<SaleOrderVO>> getSaleOrderList(int currentPage, int pageSize, SaleOrderQueryDTO queryDTO);
+    Result<page<SimpleSaleOrderVO>> getSaleOrderList(int currentPage, int pageSize, SaleOrderQueryDTO queryDTO);
 }

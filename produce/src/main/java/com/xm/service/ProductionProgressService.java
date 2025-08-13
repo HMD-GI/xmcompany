@@ -6,6 +6,7 @@ import com.xm.entity.ProductionProgress;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.vo.ProductionProgressVO;
+import com.xm.vo.ProgressVO;
 
 /**
  * 生产进度服务接口
@@ -32,7 +33,7 @@ public interface ProductionProgressService extends IService<ProductionProgress> 
      * @param projectId 项目ID
      * @return Result<page<ProductionProgressVO>>
      */
-    Result<page<ProductionProgressVO>> getProgressList(int currentPage, int pageSize, int projectId);
+    Result<page<ProgressVO>> getProgressList(int currentPage, int pageSize, int projectId);
     
     /**
      * 添加进度记录
