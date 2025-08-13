@@ -58,7 +58,7 @@ public class CustomerController {
      */
     @Operation(summary = "查询客户信息", description = "根据客户ID查询客户详细信息")
     @GetMapping("/{id}")
-    public Result<CustomerVO> getCustomerById(@PathVariable int id) {
+    public Result<Customer> getCustomerById(@PathVariable int id) {
         return customerService.getCustomerById(id);
     }
     

@@ -6,6 +6,7 @@ import com.xm.dto.SupplierStatusDTO;
 import com.xm.entity.Supplier;
 import com.xm.page.page;
 import com.xm.result.Result;
+import com.xm.vo.SimpleSupplierVO;
 import com.xm.vo.SupplierVO;
 
 /**
@@ -48,7 +49,7 @@ public interface SupplierService extends IService<Supplier> {
      * @param queryDTO 查询条件
      * @return Result<page<SupplierVO>>
      */
-    Result<page<SupplierVO>> getSupplierList(int currentPage, int pageSize, SupplierQueryDTO queryDTO);
+    Result<page<SimpleSupplierVO>> getSupplierList(int currentPage, int pageSize, SupplierQueryDTO queryDTO);
     
     /**
      * 更新供应商状态

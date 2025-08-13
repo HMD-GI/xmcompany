@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class SaleOrderVO {
     private int id; // 订单ID
     private String orderNo; // 订单编号
+
     private int customerId; // 客户ID
     private String customerName; // 客户名称
     private String productName; // 产品名称

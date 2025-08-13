@@ -7,6 +7,7 @@ import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.ProductionProjectService;
 import com.xm.vo.ProductionProjectVO;
+import com.xm.vo.ProjectVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,7 @@ public class ProductionProjectController {
      */
     @Operation(summary = "分页查询项目", description = "根据条件分页查询生产项目列表")
     @GetMapping("/list")
-    public Result<page<ProductionProjectVO>> getProjectList(
+    public Result<page<ProjectVO>> getProjectList(
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
             ProductionProjectQueryDTO queryDTO) {

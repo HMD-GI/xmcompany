@@ -42,12 +42,6 @@
             <if test="query.name != null and query.name != ''">
                 AND s.name LIKE CONCAT('%', #{query.name}, '%')
             </if>
-            <if test="query.contactPerson != null and query.contactPerson != ''">
-                AND s.contact_person LIKE CONCAT('%', #{query.contactPerson}, '%')
-            </if>
-            <if test="query.phone != null and query.phone != ''">
-                AND s.phone LIKE CONCAT('%', #{query.phone}, '%')
-            </if>
             <if test="query.status != null">
                 AND s.status = #{query.status}
             </if>

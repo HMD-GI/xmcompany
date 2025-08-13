@@ -16,12 +16,16 @@ import com.xm.service.StockService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.utils.UserContext;
 import com.xm.vo.ProductionProgressVO;
+import com.xm.vo.ProgressVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 生产进度服务实现类
@@ -154,10 +158,11 @@ public class ProductionProgressServiceImpl extends ServiceImpl<ProductionProgres
      * @param currentPage 当前页码
      * @param pageSize 每页记录数
      * @param projectId 项目ID
-     * @return Result<page<ProductionProgressVO>>
+     * @return Result<page<ProgressVO>>
      */
+    //TODO 分页动态查询项目进度记录
     @Override
-    public Result<page<ProductionProgressVO>> getProgressList(int currentPage, int pageSize, int projectId) {
+    public Result<page<ProgressVO>> getProgressList(int currentPage, int pageSize, int projectId) {
         log.info("分页查询项目进度记录: 页码={}, 每页数量={}, 项目ID={}", currentPage, pageSize, projectId);
         
         // 检查项目是否存在
@@ -172,11 +177,21 @@ public class ProductionProgressServiceImpl extends ServiceImpl<ProductionProgres
         // 执行查询
         IPage<ProductionProgressVO> progressPage = this.baseMapper.selectProgressPage(pageParam, projectId);
         
+        // 使用stream转换记录
+        List<ProgressVO> voList = progressPage.getRecords().stream()
+            .map(pp -> {
+                ProgressVO vo = new ProgressVO();
+                // 假设存在字段映射方法
+                BeanUtils.copyProperties(vo, pp);
+                return vo;
+            })
+            .collect(Collectors.toList());
+        
         // 封装结果
-        page<ProductionProgressVO> resultPage = new page<>();
+        page<ProgressVO> resultPage = new page<>();
         resultPage.setPageSize(pageSize);
         resultPage.setTotal((int) progressPage.getTotal());
-        resultPage.setList(progressPage.getRecords());
+        resultPage.setList(voList);
         
         return Result.success(resultPage);
     }

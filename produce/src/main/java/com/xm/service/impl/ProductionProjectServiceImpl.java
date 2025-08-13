@@ -15,12 +15,16 @@ import com.xm.service.ProductionProjectService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.utils.UserContext;
 import com.xm.vo.ProductionProjectVO;
+import com.xm.vo.ProjectVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 生产项目服务实现类
@@ -153,7 +157,7 @@ public class ProductionProjectServiceImpl extends ServiceImpl<ProductionProjectM
      * @return Result<page<ProductionProjectVO>>
      */
     @Override
-    public Result<page<ProductionProjectVO>> getProjectList(int currentPage, int pageSize, ProductionProjectQueryDTO queryDTO) {
+    public Result<page<ProjectVO>> getProjectList(int currentPage, int pageSize, ProductionProjectQueryDTO queryDTO) {
         log.info("分页查询项目列表: 页码={}, 每页数量={}, 查询条件={}", currentPage, pageSize, queryDTO);
         
         // 创建分页参数
@@ -161,12 +165,20 @@ public class ProductionProjectServiceImpl extends ServiceImpl<ProductionProjectM
         
         // 执行查询
         IPage<ProductionProjectVO> projectPage = productionProjectMapper.selectProjectPage(pageParam, queryDTO);
-        
+
+        List<ProjectVO> voList = projectPage.getRecords().stream().map(
+                p -> {
+                    ProjectVO projectVO = new ProjectVO();
+                    BeanUtils.copyProperties(p, projectVO);
+                    return projectVO;
+                }
+        ).collect(Collectors.toList());
+
         // 封装结果
-        page<ProductionProjectVO> resultPage = new page<>();
+        page<ProjectVO> resultPage = new page<>();
         resultPage.setPageSize(pageSize);
         resultPage.setTotal((int) projectPage.getTotal());
-        resultPage.setList(projectPage.getRecords());
+        resultPage.setList(voList);
         
         return Result.success(resultPage);
     }

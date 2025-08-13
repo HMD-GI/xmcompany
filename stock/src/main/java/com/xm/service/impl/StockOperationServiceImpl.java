@@ -9,10 +9,15 @@ import com.xm.mapper.StockOperationMapper;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.StockOperationService;
+import com.xm.vo.SimpleStockOperationVO;
 import com.xm.vo.StockOperationVO;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 库存操作记录服务实现类
@@ -63,7 +68,7 @@ public class StockOperationServiceImpl extends ServiceImpl<StockOperationMapper,
      * @return Result<page<StockOperationVO>>
      */
     @Override
-    public Result<page<StockOperationVO>> getStockOperationList(int currentPage, int pageSize, StockOperationQueryDTO queryDTO) {
+    public Result<page<SimpleStockOperationVO>> getStockOperationList(int currentPage, int pageSize, StockOperationQueryDTO queryDTO) {
         log.info("分页查询库存操作记录列表: 页码={}, 每页数量={}, 查询条件={}", currentPage, pageSize, queryDTO);
         
         // 创建分页参数
@@ -71,12 +76,19 @@ public class StockOperationServiceImpl extends ServiceImpl<StockOperationMapper,
         
         // 执行查询
         IPage<StockOperationVO> operationPage = this.baseMapper.selectStockOperationPage(pageParam, queryDTO);
-        
+
+        //转换为SimpleStockOperationVO对象
+        List<SimpleStockOperationVO> voList = operationPage.getRecords().stream().map(operation -> {
+            SimpleStockOperationVO vo = new SimpleStockOperationVO();
+            BeanUtils.copyProperties(operation, vo);
+            return vo;
+        }).collect(Collectors.toList());
+
         // 封装结果
-        page<StockOperationVO> resultPage = new page<>();
+        page<SimpleStockOperationVO> resultPage = new page<>();
         resultPage.setPageSize(pageSize);
         resultPage.setTotal((int) operationPage.getTotal());
-        resultPage.setList(operationPage.getRecords());
+        resultPage.setList(voList);
         
         return Result.success(resultPage);
     }

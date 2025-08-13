@@ -8,6 +8,7 @@ import com.xm.entity.ProductionProject;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.vo.ProductionProjectVO;
+import com.xm.vo.ProjectVO;
 
 /**
  * 生产项目服务接口
@@ -41,5 +42,5 @@ public interface ProductionProjectService extends IService<ProductionProject> {
      * @param queryDTO 查询条件
      * @return Result<page<ProductionProjectVO>>
      */
-    Result<page<ProductionProjectVO>> getProjectList(int currentPage, int pageSize, ProductionProjectQueryDTO queryDTO);
+    Result<page<ProjectVO>> getProjectList(int currentPage, int pageSize, ProductionProjectQueryDTO queryDTO);
 }

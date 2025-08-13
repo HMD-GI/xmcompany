@@ -4,6 +4,7 @@ import com.xm.dto.StockOperationQueryDTO;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.StockOperationService;
+import com.xm.vo.SimpleStockOperationVO;
 import com.xm.vo.StockOperationVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,7 +45,7 @@ public class StockOperationController {
      */
     @Operation(summary = "分页查询操作记录", description = "根据条件分页查询库存操作记录列表")
     @GetMapping("/list")
-    public Result<page<StockOperationVO>> getStockOperationList(
+    public Result<page<SimpleStockOperationVO>> getStockOperationList(
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
             StockOperationQueryDTO queryDTO) {

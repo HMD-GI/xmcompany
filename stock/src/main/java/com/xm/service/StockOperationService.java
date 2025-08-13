@@ -5,6 +5,7 @@ import com.xm.dto.StockOperationQueryDTO;
 import com.xm.entity.StockOperation;
 import com.xm.page.page;
 import com.xm.result.Result;
+import com.xm.vo.SimpleStockOperationVO;
 import com.xm.vo.StockOperationVO;
 
 /**
@@ -32,5 +33,5 @@ public interface StockOperationService extends IService<StockOperation> {
      * @param queryDTO 查询条件
      * @return Result<page<StockOperationVO>>
      */
-    Result<page<StockOperationVO>> getStockOperationList(int currentPage, int pageSize, StockOperationQueryDTO queryDTO);
+    Result<page<SimpleStockOperationVO>> getStockOperationList(int currentPage, int pageSize, StockOperationQueryDTO queryDTO);
 } 

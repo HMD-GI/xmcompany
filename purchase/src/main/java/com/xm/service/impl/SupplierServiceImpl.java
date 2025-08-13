@@ -11,6 +11,7 @@ import com.xm.mapper.SupplierMapper;
 import com.xm.page.page;
 import com.xm.result.Result;
 import com.xm.service.SupplierService;
+import com.xm.vo.SimpleSupplierVO;
 import com.xm.vo.SupplierVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.xm.utils.RedisIdGenerator;
 
 /**
@@ -155,16 +159,23 @@ public class SupplierServiceImpl extends ServiceImpl<SupplierMapper, Supplier> i
      * @return Result<page<SupplierVO>>
      */
     @Override
-    public Result<page<SupplierVO>> getSupplierList(int currentPage, int pageSize, SupplierQueryDTO queryDTO) {
+    public Result<page<SimpleSupplierVO>> getSupplierList(int currentPage, int pageSize, SupplierQueryDTO queryDTO) {
         // 创建分页对象
         Page<SupplierVO> pageParams = new Page<>(currentPage, pageSize);
         
         // 查询供应商列表
         IPage<SupplierVO> pageResult = supplierMapper.selectSupplierPage(pageParams, queryDTO);
-        
+
+        //转换为SimpleSupplierVO对象
+        List<SimpleSupplierVO> voList = pageResult.getRecords().stream().map(supplier -> {
+            SimpleSupplierVO simpleSupplierVO = new SimpleSupplierVO();
+            BeanUtils.copyProperties(supplier, simpleSupplierVO);
+            return simpleSupplierVO;
+        }).collect(Collectors.toList());
+
         // 转换为自定义分页对象
-        page<SupplierVO> resultPage = new page<>();
-        resultPage.setList(pageResult.getRecords());
+        page<SimpleSupplierVO> resultPage = new page<>();
+        resultPage.setList(voList);
         resultPage.setTotal((int) pageResult.getTotal());
         resultPage.setPageSize(pageSize);
         

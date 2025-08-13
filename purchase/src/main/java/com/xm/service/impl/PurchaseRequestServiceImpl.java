@@ -13,12 +13,15 @@ import com.xm.result.Result;
 import com.xm.service.PurchaseRequestService;
 import com.xm.vo.PurchaseRequestVO;
 import com.xm.utils.RedisIdGenerator;
+import com.xm.vo.SimplePurchaseRequestVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 采购申请服务实现类
@@ -150,14 +153,24 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
      * @return Result<page<PurchaseRequestVO>>
      */
     @Override
-    public Result<page<PurchaseRequestVO>> getPurchaseRequestList(int currentPage, int pageSize, PurchaseRequestQueryDTO queryDTO) {
+    public Result<page<SimplePurchaseRequestVO>> getPurchaseRequestList(int currentPage, int pageSize, PurchaseRequestQueryDTO queryDTO) {
         Page<PurchaseRequestVO> pageObj = new Page<>(currentPage, pageSize);
         IPage<PurchaseRequestVO> iPage = purchaseRequestMapper.selectPurchaseRequestPage(pageObj, queryDTO);
+
+        //转换为SimplePurchaseRequestVO对象
+        List<SimplePurchaseRequestVO> voList = iPage.getRecords().stream().map(
+                request -> {
+                    SimplePurchaseRequestVO vo = new SimplePurchaseRequestVO();
+                    BeanUtils.copyProperties(request, vo);
+                    return vo;
+                }
+        ).collect(Collectors.toList());
+
         // 封装自定义page对象
-        page<PurchaseRequestVO> resultPage = new page<>();
-        resultPage.list = iPage.getRecords(); // 当前页数据
-        resultPage.total = (int) iPage.getTotal(); // 总条数
-        resultPage.pageSize = (int) iPage.getSize(); // 每页条数
+        page<SimplePurchaseRequestVO> resultPage = new page<>();
+        resultPage.setList(voList); // 当前页数据
+        resultPage.setTotal((int) iPage.getTotal());// 总条数
+        resultPage.setPageSize(pageSize);// 每页条数
         return Result.success(resultPage);
     }
 

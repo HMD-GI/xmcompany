@@ -451,17 +451,14 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
     }
     
     @Override
-    public Result<PayrollVO> getPayrollById(int payrollId) {
+    public Result<Payroll> getPayrollById(int payrollId) {
         // 查询工资单
         Payroll payroll = payrollMapper.selectById(payrollId);
         if (payroll == null) {
             return Result.error("工资单不存在");
         }
         
-        // 转换为VO
-        PayrollVO payrollVO = convertToPayrollVO(payroll);
-        
-        return Result.success(payrollVO);
+        return Result.success(payroll);
     }
     
     @Override
@@ -579,19 +576,19 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
             payrollVO.setBankCardNo(maskedCardNo);
         }
         
-        // 计算收入合计
-        BigDecimal totalIncome = payroll.getBasicSalary()
-                              .add(payroll.getPerformance())
-                              .add(payroll.getAllowance())
-                              .add(payroll.getOvertime())
-                              .add(payroll.getBonus());
-        payrollVO.setTotalIncome(totalIncome);
+//        // 计算收入合计
+//        BigDecimal totalIncome = payroll.getBasicSalary()
+//                              .add(payroll.getPerformance())
+//                              .add(payroll.getAllowance())
+//                              .add(payroll.getOvertime())
+//                              .add(payroll.getBonus());
+//        payrollVO.setTotalIncome(totalIncome);
         
-        // 计算扣除合计
-        BigDecimal totalDeduction = payroll.getDeduction()
-                                 .add(payroll.getInsuranceAmount())
-                                 .add(payroll.getTax());
-        payrollVO.setTotalDeduction(totalDeduction);
+//        // 计算扣除合计
+//        BigDecimal totalDeduction = payroll.getDeduction()
+//                                 .add(payroll.getInsuranceAmount())
+//                                 .add(payroll.getTax());
+//        payrollVO.setTotalDeduction(totalDeduction);
         
         // 设置状态描述
         payrollVO.setStatusDesc(PAYROLL_STATUS_MAP.getOrDefault(payroll.getStatus(), "未知"));

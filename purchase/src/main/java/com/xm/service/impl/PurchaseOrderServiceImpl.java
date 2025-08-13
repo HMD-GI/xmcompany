@@ -17,6 +17,8 @@ import com.xm.service.PurchaseRequestService;
 import com.xm.service.SupplierService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.vo.PurchaseOrderVO;
+import com.xm.vo.SimplePurchaseOrderVO;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.data.redis.core.RedisTemplate;
 
 /**
@@ -265,18 +270,28 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
      * @return Result<page<PurchaseOrderVO>>
      */
     @Override
-    public Result<page<PurchaseOrderVO>> getPurchaseOrderList(int currentPage, int pageSize, PurchaseOrderQueryDTO queryDTO) {
+    public Result<page<SimplePurchaseOrderVO>> getPurchaseOrderList(int currentPage, int pageSize, PurchaseOrderQueryDTO queryDTO) {
         // 创建分页对象
         Page<PurchaseOrderVO> pageObj = new Page<>(currentPage, pageSize);
         
         // 查询采购订单列表
         IPage<PurchaseOrderVO> iPage = purchaseOrderMapper.selectPurchaseOrderPage(pageObj, queryDTO);
+
+        //转换为SimplePurchaseOrderVO对象
+        List<SimplePurchaseOrderVO> list = iPage.getRecords().stream().map(order -> {
+            SimplePurchaseOrderVO simpleOrder = new SimplePurchaseOrderVO();
+            BeanUtils.copyProperties(order, simpleOrder);
+            return simpleOrder;
+        }).collect(Collectors.toList());
         
         // 封装自定义page对象
-        page<PurchaseOrderVO> resultPage = new page<>();
-        resultPage.list = iPage.getRecords();
-        resultPage.total = (int) iPage.getTotal();
-        resultPage.pageSize = (int) iPage.getSize();
+        page<SimplePurchaseOrderVO> resultPage = new page<>();
+        resultPage.setList(list);
+        resultPage.setTotal((int) iPage.getTotal());
+        resultPage.setPageSize(pageSize);
+//        resultPage.list = iPage.getRecords();
+//        resultPage.total = (int) iPage.getTotal();
+//        resultPage.pageSize = (int) iPage.getSize();
         
         return Result.success(resultPage);
     }

@@ -165,17 +165,14 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
      * @return 请假详情
      */
     @Override
-    public Result<LeaveVO> getLeaveById(int id) {
+    public Result<Leave> getLeaveById(int id) {
         // 查询请假记录
         Leave leave = leaveMapper.selectById(id);
         if (leave == null) {
             return Result.error("请假记录不存在");
         }
         
-        // 转换为VO
-        LeaveVO leaveVO = convertToVO(leave);
-        
-        return Result.success(leaveVO);
+        return Result.success(leave);
     }
 
     /**
@@ -186,6 +183,7 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
      * @param status 请假状态，可为空
      * @return 请假分页列表
      */
+    // TODO 添加一个请假类型
     @Override
     public Result<page<LeaveVO>> getLeaveList(int currentPage, int pageSize, Integer employeeId, Integer status) {
         // 创建查询条件
@@ -230,11 +228,11 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
         LeaveVO leaveVO = new LeaveVO();
         BeanUtils.copyProperties(leave, leaveVO);
         
-        // 设置请假类型描述
-        leaveVO.setLeaveTypeDesc(LEAVE_TYPE_MAP.getOrDefault(leave.getLeaveType(), "未知"));
-        
-        // 设置状态描述
-        leaveVO.setStatusDesc(LEAVE_STATUS_MAP.getOrDefault(leave.getStatus(), "未知"));
+//        // 设置请假类型描述
+//        leaveVO.setLeaveTypeDesc(LEAVE_TYPE_MAP.getOrDefault(leave.getLeaveType(), "未知"));
+//
+//        // 设置状态描述
+//        leaveVO.setStatusDesc(LEAVE_STATUS_MAP.getOrDefault(leave.getStatus(), "未知"));
         
         // 计算请假天数
         if (leave.getStartTime() != null && leave.getEndTime() != null) {

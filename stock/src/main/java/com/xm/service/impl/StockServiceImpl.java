@@ -16,17 +16,21 @@ import com.xm.service.StockOperationService;
 import com.xm.service.StockService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.utils.UserContext;
+import com.xm.vo.SimpleStockVO;
 import com.xm.vo.StockVO;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 库存服务实现类
@@ -322,7 +326,7 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
      * @return Result<page<StockVO>>
      */
     @Override
-    public Result<page<StockVO>> getStockList(int currentPage, int pageSize, StockQueryDTO queryDTO) {
+    public Result<page<SimpleStockVO>> getStockList(int currentPage, int pageSize, StockQueryDTO queryDTO) {
         log.info("分页查询库存列表: 页码={}, 每页数量={}, 查询条件={}", currentPage, pageSize, queryDTO);
         
         // 创建分页参数
@@ -330,12 +334,19 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
         
         // 执行查询
         IPage<StockVO> stockPage = this.baseMapper.selectStockPage(pageParam, queryDTO);
-        
+
+        //转换为SimpleStockVO对象
+        List<SimpleStockVO> voList = stockPage.getRecords().stream().map(stock -> {
+            SimpleStockVO simpleStockVO = new SimpleStockVO();
+            BeanUtils.copyProperties(stock, simpleStockVO);
+            return simpleStockVO;
+        }).collect(Collectors.toList());
+
         // 封装结果
-        page<StockVO> resultPage = new page<>();
+        page<SimpleStockVO> resultPage = new page<>();
         resultPage.setPageSize(pageSize);
         resultPage.setTotal((int) stockPage.getTotal());
-        resultPage.setList(stockPage.getRecords());
+        resultPage.setList(voList);
         
         return Result.success(resultPage);
     }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.dto.PayrollAdjustmentDTO;
 import com.xm.dto.PayrollGenerationDTO;
 import com.xm.dto.SalaryDTO;
+import com.xm.entity.Payroll;
 import com.xm.entity.Salary;
 import com.xm.page.page;
 import com.xm.result.Result;
@@ -62,7 +63,7 @@ public interface SalaryService extends IService<Salary> {
      * @param payrollId 工资单ID
      * @return Result<PayrollVO>
      */
-    Result<PayrollVO> getPayrollById(int payrollId);
+    Result<Payroll> getPayrollById(int payrollId);
     
     /**
      * 查询员工工资单列表

@@ -103,18 +103,14 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
      * @return Result<CustomerVO> 客户详情
      */
     @Override
-    public Result<CustomerVO> getCustomerById(int id) {
+    public Result<Customer> getCustomerById(int id) {
         // 查询客户信息
         Customer customer = customerMapper.selectById(id);
         if (customer == null) {
             return Result.error("客户不存在");
         }
         
-        // 转换为VO对象
-        CustomerVO vo = new CustomerVO();
-        BeanUtils.copyProperties(customer, vo);
-        
-        return Result.success(vo);
+        return Result.success(customer);
     }
 
     /**
@@ -123,6 +119,7 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
      * @param pageSize 每页显示数量
      * @return Result<page<CustomerVO>> 分页结果
      */
+    // TODO 分页查询客户列表改为动态条件查询
     @Override
     public Result<page<CustomerVO>> getCustomerList(int currentPage, int pageSize) {
         // 创建分页对象

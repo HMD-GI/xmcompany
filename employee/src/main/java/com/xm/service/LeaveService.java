@@ -32,7 +32,7 @@ public interface LeaveService extends IService<Leave> {
      * @param id 请假记录ID
      * @return Result<LeaveVO>
      */
-    Result<LeaveVO> getLeaveById(int id);
+    Result<Leave> getLeaveById(int id);
     
     /**
      * 分页查询请假列表
