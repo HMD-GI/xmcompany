@@ -17,8 +17,8 @@ public class SimpleSaleOrderVO {
     private String unit; // 单位（个、件、kg等）
 
 //    private BigDecimal amount; // 订单金额
-//    private int status; // 订单状态（0:待处理, 1:已确认, 2:已发货, 3:已完成, 4:已取消）
-    private String statusName; // 订单状态名称
+    private int status; // 订单状态（0:待处理, 1:已确认, 2:已发货, 3:已完成, 4:已取消）
+//    private String statusName; // 订单状态名称
 
 //    private LocalDateTime deliveryTime; // 交货时间
 //    private LocalDateTime shippingTime; // 发货时间

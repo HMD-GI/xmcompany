@@ -17,7 +17,7 @@ export function getSaleOrderById(id) {
 }
 
 export function getSaleOrderList(params) {
-  return request.get('/xm/sale-order/list', { params })
+  return request.get('/xm/sale/order/list', { params })
 }
 
 export function updateSaleOrderStatus(data) {

@@ -1,7 +1,8 @@
 <template>
   <el-dialog
     :title="modeTitle"
-    v-model="visible"
+    :modelValue="visible"
+    @update:modelValue="$emit('update:visible', $event)"
     width="600px"
     @close="reset"
   >
@@ -28,7 +29,7 @@
       <!-- 可扩展采购明细子表 -->
     </div>
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
+      <el-button @click="$emit('update:visible', false)">取消</el-button>
       <el-button v-if="mode !== 'detail'" type="primary" @click="onSubmit">保存</el-button>
     </template>
   </el-dialog>

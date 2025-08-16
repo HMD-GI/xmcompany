@@ -2,10 +2,10 @@
   <div class="sale-list-container">
     <!-- 查询表单 -->
     <el-card class="search-card" shadow="never">
-      <el-form inline>
+      <el-form :model="queryDTO" :inline="true" @keyup.enter="handleSearch">
         <el-form-item label="订单编号">
           <el-input 
-            v-model="orderNo" 
+            v-model="queryDTO.orderNo" 
             placeholder="请输入订单编号" 
             clearable
             @clear="handleSearch"
@@ -13,7 +13,7 @@
         </el-form-item>
         <el-form-item label="客户名称">
           <el-input 
-            v-model="customerName" 
+            v-model="queryDTO.customerName" 
             placeholder="请输入客户名称" 
             clearable
             @clear="handleSearch"
@@ -21,7 +21,7 @@
         </el-form-item>
         <el-form-item label="产品名称">
           <el-input 
-            v-model="productName" 
+            v-model="queryDTO.productName" 
             placeholder="请输入产品名称" 
             clearable
             @clear="handleSearch"
@@ -29,16 +29,14 @@
         </el-form-item>
         <el-form-item label="订单状态">
           <el-select 
-            v-model="status" 
+            v-model="queryDTO.status" 
             placeholder="请选择状态"
             clearable
             @clear="handleSearch"
           >
-            <el-option label="待处理" :value="0" />
-            <el-option label="已确认" :value="1" />
-            <el-option label="已发货" :value="2" />
-            <el-option label="已完成" :value="3" />
-            <el-option label="已取消" :value="4" />
+            <el-option label="待审核" value="PENDING" />
+            <el-option label="已通过" value="APPROVED" />
+            <el-option label="已拒绝" value="REJECTED" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -77,53 +75,28 @@
             {{ row.quantity }} {{ row.unit }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="100" align="center">
+        <el-table-column prop="statusName" label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="getStatusType(getStatusName(row.status))">{{ getStatusName(row.status) }}</el-tag>
+            <el-tag :type="getStatusType(row.statusName)">{{ row.statusName }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="450" align="center">
+        <el-table-column label="操作" width="180" align="center">
           <template #default="{ row }">
             <el-button link type="primary" :icon="View" @click="handleDetail(row)">详情</el-button>
             <el-button 
-              v-if="row.status === 0"
+              v-if="row.statusName === '待审核'"
               link 
               type="primary" 
               :icon="EditPen" 
               @click="handleEdit(row)"
             >编辑</el-button>
             <el-button 
-              v-if="row.status === 0"
+              v-if="row.statusName === '待审核'"
               link 
               type="danger" 
               :icon="Delete" 
               @click="handleDelete(row)"
             >删除</el-button>
-            <el-button 
-              link 
-              type="primary" 
-              :icon="Edit" 
-              @click="handleModify(row)"
-            >修改</el-button>
-            <el-dropdown 
-              v-if="row.status !== 3 && row.status !== 4"
-              @command="(command) => handleStatusUpdate(row, command)"
-            >
-              <el-button link type="primary" :icon="Setting">
-                更新状态<el-icon class="el-icon--right"><ArrowDown /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item 
-                    v-for="(label, value) in getNextStatusOptions(row.status)"
-                    :key="value"
-                    :command="value"
-                  >
-                    {{ label }}
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
           </template>
         </el-table-column>
       </el-table>
@@ -133,7 +106,7 @@
         <el-pagination
           v-model:current-page="query.currentPage"
           v-model:page-size="query.pageSize"
-          :page-sizes="[10, 20, 50]"
+          :page-sizes="[10, 20, 50, 100]"
           :total="total"
           layout="total, sizes, prev, pager, next, jumper"
           @size-change="handleSizeChange"
@@ -141,20 +114,12 @@
         />
       </div>
     </el-card>
-
-    <!-- 详情对话框 -->
-    <SaleDetailDialog
-      v-model:visible="dialogVisible"
-      :mode="dialogMode"
-      :order="currentOrder"
-      @refresh="handleSearch"
-    />
   </div>
 </template>
+
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { getSaleOrderList, deleteSaleOrder, updateSaleOrderStatus } from '@/api/sale'
-import SaleDetailDialog from './SaleDetailDialog.vue'
+import { getSaleOrderList } from '@/api/sale'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Search, 
@@ -162,22 +127,16 @@ import {
   Plus, 
   View, 
   EditPen, 
-  Delete,
-  Setting,
-  ArrowDown,
-  Edit
+  Delete 
 } from '@element-plus/icons-vue'
 
-// 对话框相关状态
-const dialogVisible = ref(false)
-const dialogMode = ref('add')
-const currentOrder = ref(null)
-
 // 查询条件
-const orderNo = ref('') // 订单编号
-const customerName = ref('') // 客户名称
-const productName = ref('') // 产品名称
-const status = ref(null) // 订单状态
+const queryDTO = reactive({
+  orderNo: '',
+  customerName: '',
+  productName: '',
+  status: ''
+})
 
 // 分页参数
 const query = reactive({
@@ -195,21 +154,12 @@ async function fetchList() {
   loading.value = true
   try {
     const res = await getSaleOrderList({
-      orderNo: orderNo.value,
-      customerName: customerName.value,
-      productName: productName.value,
-      status: status.value,
-      currentPage: query.currentPage,
-      pageSize: query.pageSize
+      queryDTO,
+      ...query
     })
     if (res.data?.code === 0) {
-      // 确保状态值是数字类型
-      list.value = (res.data.data.list || []).map(item => ({
-        ...item,
-        status: Number(item.status) // 转换为数字
-      }))
+      list.value = res.data.data.list || []
       total.value = res.data.data.total || 0
-      console.log('List data:', list.value) // 调试用
     } else {
       ElMessage.error(res.data?.msg || '获取销售订单列表失败')
     }
@@ -229,10 +179,12 @@ function handleSearch() {
 
 // 重置查询
 function handleReset() {
-  orderNo.value = ''
-  customerName.value = ''
-  productName.value = ''
-  status.value = null
+  Object.assign(queryDTO, {
+    orderNo: '',
+    customerName: '',
+    productName: '',
+    status: ''
+  })
   handleSearch()
 }
 
@@ -249,52 +201,25 @@ function handleCurrentChange(val) {
 
 // 获取状态标签类型
 function getStatusType(status) {
-  const types = {
-    '待处理': 'info',
-    '已确认': 'warning',
-    '已发货': 'primary',
-    '已完成': 'success',
-    '已取消': 'danger'
+  const map = {
+    '待审核': 'warning',
+    '已通过': 'success',
+    '已拒绝': 'danger'
   }
-  return types[status] || 'info'
-}
-
-// 获取状态名称
-function getStatusName(status) {
-  status = Number(status) // 确保是数字类型
-  const statusMap = {
-    0: '待处理',
-    1: '已确认',
-    2: '已发货',
-    3: '已完成',
-    4: '已取消'
-  }
-  return statusMap[status] || '未知状态'
+  return map[status] || 'info'
 }
 
 // 操作处理
 function handleAdd() {
-  dialogMode.value = 'add'
-  currentOrder.value = null
-  dialogVisible.value = true
+  ElMessage.info('新增订单功能开发中')
 }
 
 function handleDetail(row) {
-  dialogMode.value = 'detail'
-  currentOrder.value = { ...row }
-  dialogVisible.value = true
+  ElMessage.info('查看订单详情：' + row.orderNo)
 }
 
 function handleEdit(row) {
-  dialogMode.value = 'edit'
-  currentOrder.value = { ...row }
-  dialogVisible.value = true
-}
-
-function handleModify(row) {
-  dialogMode.value = 'modify'
-  currentOrder.value = { ...row }
-  dialogVisible.value = true
+  ElMessage.info('编辑订单：' + row.orderNo)
 }
 
 function handleDelete(row) {
@@ -306,60 +231,17 @@ function handleDelete(row) {
       cancelButtonText: '取消',
       type: 'warning'
     }
-  ).then(async () => {
-    try {
-      await deleteSaleOrder(row.id)
-      ElMessage.success('删除成功')
-      fetchList()
-    } catch (error) {
-      ElMessage.error('删除失败')
-    }
+  ).then(() => {
+    ElMessage.success('删除成功：' + row.orderNo)
   }).catch(() => {})
-}
-
-// 获取可更新的下一状态选项
-function getNextStatusOptions(currentStatus) {
-  const options = {}
-  switch (currentStatus) {
-    case 0: // 待处理
-      options[1] = '确认订单'
-      options[4] = '取消订单'
-      break
-    case 1: // 已确认
-      options[2] = '发货'
-      options[4] = '取消订单'
-      break
-    case 2: // 已发货
-      options[3] = '完成订单'
-      break
-  }
-  return options
-}
-
-// 处理状态更新
-async function handleStatusUpdate(row, newStatus) {
-  try {
-    const res = await updateSaleOrderStatus({
-      id: row.id,
-      status: newStatus
-    })
-    if (res.data?.code === 0) {
-      ElMessage.success('状态更新成功')
-      fetchList()
-    } else {
-      ElMessage.error(res.data?.msg || '状态更新失败')
-    }
-  } catch (error) {
-    console.error('更新订单状态失败:', error)
-    ElMessage.error('状态更新失败')
-  }
 }
 
 // 页面加载时获取数据
 onMounted(() => {
-  handleSearch()
+  fetchList()
 })
 </script>
+
 <style scoped>
 .sale-list-container {
   padding: 16px;

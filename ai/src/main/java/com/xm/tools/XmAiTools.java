@@ -37,7 +37,7 @@ public class XmAiTools {
         
         try {
             // 调用客户服务查询客户信息
-            Result<CustomerVO> result = customerService.getCustomerById(customerId);
+            Result<Customer> result = customerService.getCustomerById(customerId);
             
             if (result.getCode() == 1 && result.getData() != null) {
                 // 查询成功

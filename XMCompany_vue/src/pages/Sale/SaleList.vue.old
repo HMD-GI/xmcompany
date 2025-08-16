@@ -1,0 +1,279 @@
+<template>
+  <div class="sale-list-container">
+    <!-- 查询表单 -->
+    <el-card class="search-card" shadow="never">
+      <el-form :model="queryDTO" :inline="true" @keyup.enter="handleSearch">
+        <el-form-item label="订单编号">
+          <el-input 
+            v-model="queryDTO.orderNo" 
+            placeholder="请输入订单编号" 
+            clearable
+            @clear="handleSearch"
+          />
+        </el-form-item>
+        <el-form-item label="客户名称">
+          <el-input 
+            v-model="queryDTO.customerName" 
+            placeholder="请输入客户名称" 
+            clearable
+            @clear="handleSearch"
+          />
+        </el-form-item>
+        <el-form-item label="产品名称">
+          <el-input 
+            v-model="queryDTO.productName" 
+            placeholder="请输入产品名称" 
+            clearable
+            @clear="handleSearch"
+          />
+        </el-form-item>
+        <el-form-item label="订单状态">
+          <el-select 
+            v-model="queryDTO.status" 
+            placeholder="请选择状态"
+            clearable
+            @clear="handleSearch"
+          >
+            <el-option label="待审核" value="PENDING" />
+            <el-option label="已通过" value="APPROVED" />
+            <el-option label="已拒绝" value="REJECTED" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" :icon="Search" @click="handleSearch">查询</el-button>
+          <el-button :icon="RefreshRight" @click="handleReset">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
+
+    <!-- 数据表格 -->
+    <el-card class="table-card" shadow="never">
+      <template #header>
+        <div class="card-header">
+          <div class="header-left">
+            <span class="title">销售订单列表</span>
+            <el-tag type="info" effect="plain" round>共 {{ total }} 条</el-tag>
+          </div>
+          <div class="header-right">
+            <el-button type="primary" :icon="Sell" @click="handleManage">销售管理</el-button>
+            <el-button type="success" :icon="Plus" @click="handleAdd">新增订单</el-button>
+          </div>
+        </div>
+      </template>
+
+      <el-table 
+        :data="list" 
+        style="width: 100%" 
+        v-loading="loading"
+        border
+        stripe
+        highlight-current-row
+      >
+        <el-table-column type="index" label="序号" width="60" align="center" />
+        <el-table-column prop="orderNo" label="订单编号" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="customerName" label="客户名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="productName" label="产品名称" min-width="120" show-overflow-tooltip />
+        <el-table-column prop="quantity" label="数量" min-width="100" align="right">
+          <template #default="{ row }">
+            {{ row.quantity }} {{ row.unit }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="statusName" label="状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="getStatusType(row.statusName)">{{ row.statusName }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="180" align="center">
+          <template #default="{ row }">
+            <el-button link type="primary" :icon="View" @click="handleDetail(row)">详情</el-button>
+            <el-button 
+              v-if="row.statusName === '待审核'"
+              link 
+              type="primary" 
+              :icon="EditPen" 
+              @click="handleEdit(row)"
+            >编辑</el-button>
+            <el-button 
+              v-if="row.statusName === '待审核'"
+              link 
+              type="danger" 
+              :icon="Delete" 
+              @click="handleDelete(row)"
+            >删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    
+    <el-pagination
+      v-model:current-page="query.currentPage"
+      v-model:page-size="query.pageSize"
+      :total="total"
+      @current-change="fetchList"
+      @size-change="fetchList"
+      layout="total, prev, pager, next, sizes"
+      :page-sizes="[10, 20, 50]"
+      class="pagination"
+    />
+    
+    <SaleDetailDialog
+      v-model:visible="dialogVisible"
+      :mode="dialogMode"
+      :order="currentOrder"
+      @refresh="fetchList"
+    />
+  </el-card>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { getSaleOrderList, deleteSaleOrder, updateSaleOrderStatus } from '@/api/sale'
+import SaleDetailDialog from './SaleDetailDialog.vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+import { ref, reactive, onMounted } from 'vue'
+import { getSaleOrderList } from '@/api/sale'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { 
+  Search, 
+  RefreshRight, 
+  Plus, 
+  View, 
+  EditPen, 
+  Delete,
+  Sell
+} from '@element-plus/icons-vue'
+
+// 查询条件
+const queryDTO = reactive({
+  orderNo: '',
+  customerName: '',
+  productName: '',
+  status: ''
+})
+
+// 分页参数
+const query = reactive({
+  currentPage: 1,
+  pageSize: 10
+})
+
+// 数据相关
+const list = ref([])
+const total = ref(0)
+const loading = ref(false)
+
+// 获取列表数据
+async function fetchList() {
+  loading.value = true
+  try {
+    const res = await getSaleOrderList({
+      queryDTO,
+      ...query
+    })
+    if (res.data?.code === 0) {
+      list.value = res.data.data.list || []
+      total.value = res.data.data.total || 0
+    } else {
+      ElMessage.error(res.data?.msg || '获取销售订单列表失败')
+    }
+  } catch (error) {
+    console.error('获取销售订单列表失败:', error)
+    ElMessage.error('获取销售订单列表失败')
+  } finally {
+    loading.value = false
+  }
+    list.value = data.list || []
+    total.value = data.total || 0
+  }).finally(() => loading.value = false)
+}
+
+function resetQuery() {
+  query.value.orderNo = ''
+  query.value.customerName = ''
+  query.value.status = ''
+  fetchList()
+}
+
+function getStatusType(status) {
+  const types = {
+    '待确认': 'warning',
+    '已确认': 'primary',
+    '生产中': 'info',
+    '已完成': 'success',
+    '已取消': 'danger'
+  }
+  return types[status] || 'info'
+}
+
+function openAdd() {
+  dialogMode.value = 'add'
+  currentOrder.value = null
+  dialogVisible.value = true
+}
+
+function openEdit(row) {
+  dialogMode.value = 'edit'
+  currentOrder.value = { ...row }
+  dialogVisible.value = true
+}
+
+function openDetail(row) {
+  dialogMode.value = 'detail'
+  currentOrder.value = { ...row }
+  dialogVisible.value = true
+}
+
+function updateStatus(row) {
+  ElMessageBox.prompt('请选择新状态', '更新订单状态', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    inputType: 'select',
+    inputOptions: [
+      { value: '待确认', label: '待确认' },
+      { value: '已确认', label: '已确认' },
+      { value: '生产中', label: '生产中' },
+      { value: '已完成', label: '已完成' },
+      { value: '已取消', label: '已取消' }
+    ]
+  }).then(({ value }) => {
+    updateSaleOrderStatus({ id: row.id, status: value }).then(() => {
+      ElMessage.success('状态更新成功')
+      fetchList()
+    })
+  })
+}
+
+function handleDelete(row) {
+  ElMessageBox.confirm('确定要删除这个订单吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deleteSaleOrder(row.id).then(() => {
+      ElMessage.success('删除成功')
+      fetchList()
+    })
+  })
+}
+
+onMounted(fetchList)
+</script>
+
+<style scoped>
+.sale-card {
+  margin: 20px;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.search-form {
+  margin-bottom: 20px;
+}
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+</style>

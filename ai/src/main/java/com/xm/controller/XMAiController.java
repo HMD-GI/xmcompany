@@ -2,6 +2,7 @@ package com.xm.controller;
 
 import com.xm.assistant.Assistant;
 import com.xm.entity.ChatMessages;
+import com.xm.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,14 @@ public class XMAiController {
 
     @Autowired
     private Assistant assistant;
+
+    @Autowired
+    private ChatService chatService;
     
     @Operation(summary = "智能对话", description = "与AI助手进行实时对话，支持流式响应")
     @PostMapping(value = "/chat",produces = "text/stream;charset=utf-8")
     public Flux<String> chat(@RequestBody ChatMessages chatMessages) {
+        chatService.chat(chatMessages);
         return assistant.chat(chatMessages.getMessageId(), chatMessages.getContent());
     }
 

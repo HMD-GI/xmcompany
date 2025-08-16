@@ -6,6 +6,7 @@
     </div>
     
     <div class="chat-container" ref="chatContainer">
+      <!-- 添加滚动条 -->
       <div v-if="messages.length === 0" class="empty-chat">
         <div class="empty-icon">🤖</div>
         <div class="empty-text">您好！我是AI助手，有什么可以帮您解答的问题吗？</div>
@@ -13,7 +14,7 @@
       
       <div v-else class="message-list">
         <div 
-          v-for="(msg, idx) in messages" 
+          v-for="(msg, idx) in [...messages].reverse()" 
           :key="idx" 
           class="message-item" 
           :class="{'message-user': msg.role === 'user', 'message-ai': msg.role === 'ai'}"
@@ -70,48 +71,58 @@ function formatTime() {
   return `${hours}:${minutes}`
 }
 
-// 滚动到底部
+// 滚动到顶部
 async function scrollToBottom() {
   await nextTick()
   if (chatContainer.value) {
-    chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+    chatContainer.value.scrollTop = 0
   }
 }
 
 // 发送消息
 async function send() {
-  if (!input.value.trim()) return
+  if (!input.value.trim()) return;
   
   const userMessage = { 
     role: 'user', 
     content: input.value, 
     time: formatTime() 
-  }
+  };
   
-  messages.value.push(userMessage)
-  const userInput = input.value
-  input.value = ''
+  // 立即推送用户消息
+  messages.value.push(userMessage);
+  const userInput = input.value;
+  input.value = '';
   
-  await scrollToBottom()
-  loading.value = true
+  // 等待消息渲染后滚动到底部
+  await nextTick(() => {
+    scrollToBottom();
+  });
+
+  loading.value = true;
   
   try {
-    const res = await aiChat({ messageId: Date.now() + '', content: userInput })
-    messages.value.push({ 
+    const res = await aiChat({ content: userInput });
+    const aiMessage = { 
       role: 'ai', 
       content: res.data, 
       time: formatTime() 
-    })
+    };
+    // 立即推送AI消息
+    messages.value.push(aiMessage);
   } catch (error) {
-    console.error('AI回复失败:', error)
+    console.error('AI回复失败:', error);
     messages.value.push({ 
       role: 'ai', 
       content: '抱歉，我遇到了一些问题，请稍后再试。', 
       time: formatTime() 
-    })
+    });
   } finally {
-    loading.value = false
-    await scrollToBottom()
+    loading.value = false;
+    // 等待AI消息渲染后滚动到底部
+    await nextTick(() => {
+      scrollToBottom();
+    });
   }
 }
 
@@ -141,9 +152,10 @@ function saveMessages() {
 watch(messages, saveMessages, { deep: true })
 </script>
 
+
 <style scoped>
 .chat-card {
-  height: calc(100vh - 140px);
+  height: 77vh; /* 将高度设置为视口高度 */
   display: flex;
   flex-direction: column;
 }
@@ -164,10 +176,14 @@ watch(messages, saveMessages, { deep: true })
 }
 
 .chat-container {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1; /* 占据剩余空间 */
+  overflow-y: auto; /* 启用垂直滚动 */
   padding: 10px 0;
+  max-height: 450px;
   margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .empty-chat {
@@ -192,8 +208,10 @@ watch(messages, saveMessages, { deep: true })
 
 .message-list {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   gap: 16px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .message-item {
@@ -247,17 +265,42 @@ watch(messages, saveMessages, { deep: true })
   align-self: flex-end;
 }
 
+/* 修改：固定输入框位置 */
 .chat-input-container {
+  position: fixed; /* 使输入框固定 */
+  bottom: 0; /* 固定在底部 */
+  right: 0; /* 向左对齐 */
+  width: 85%; /* 全宽 */
   display: flex;
   gap: 10px;
-  margin-top: auto;
+  padding: 10px;
+  background-color: white;
+  border-top: 1px solid #ebeef5;
+  z-index: 1;
+}
+
+.input-area {
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 .chat-input {
   flex: 1;
 }
 
+.input-buttons {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.input-buttons .el-button {
+  margin-right: 5px;
+}
+
 .send-button {
   align-self: flex-end;
 }
+
 </style>

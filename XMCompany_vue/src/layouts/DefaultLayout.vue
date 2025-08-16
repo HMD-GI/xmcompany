@@ -38,6 +38,10 @@
             <el-icon><i class="el-icon-shopping-cart-full"></i></el-icon>
             <span>采购管理</span>
           </el-menu-item>
+          <el-menu-item index="/sale">
+            <el-icon><i class="el-icon-sell"></i></el-icon>
+            <span>销售管理</span>
+          </el-menu-item>
           <el-menu-item index="/customer">
             <el-icon><i class="el-icon-user"></i></el-icon>
             <span>客户管理</span>

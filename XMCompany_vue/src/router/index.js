@@ -10,6 +10,7 @@ const routes = [
       { path: '', redirect: '/stock' },
       { path: 'stock', component: () => import('@/pages/Stock/StockList.vue') },
       { path: 'purchase', component: () => import('@/pages/Purchase/PurchaseList.vue') },
+      { path: 'sale', component: () => import('@/pages/Sale/SaleList.vue') },
       { path: 'customer', component: () => import('@/pages/Customer/CustomerList.vue') },
       { path: 'employee', component: () => import('@/pages/Employee/EmployeeList.vue') },
       { path: 'leave', component: () => import('@/pages/Leave/LeaveList.vue') },

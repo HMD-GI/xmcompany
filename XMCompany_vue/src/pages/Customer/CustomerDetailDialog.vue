@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     :title="modeTitle"
-    v-model="visible"
+    v-model="dialogVisible"
     width="600px"
     @close="reset"
   >
@@ -52,7 +52,7 @@
       </div>
     </div>
     <template #footer>
-      <el-button @click="visible = false">{{ mode === 'detail' ? '关闭' : '取消' }}</el-button>
+      <el-button @click="dialogVisible = false">{{ mode === 'detail' ? '关闭' : '取消' }}</el-button>
       <el-button v-if="mode !== 'detail'" type="primary" @click="onSubmit">保存</el-button>
     </template>
   </el-dialog>
@@ -64,36 +64,23 @@ import { addCustomer, updateCustomer } from '@/api/customer'
 import { ElMessage } from 'element-plus'
 
 const props = defineProps({
-  visible: Boolean,
+  modelValue: Boolean,
   mode: {
     type: String,
     default: 'detail' // add | edit | detail
   },
   customer: Object
 })
-const emit = defineEmits(['update:visible', 'refresh'])
+const emit = defineEmits(['update:modelValue', 'refresh'])
 
-const form = ref({
-  name: '',
-  contactPerson: '',
-  contactPhone: '',
-  address: '',
-  email: '',
-  remark: ''
+// 创建计算属性代理双向绑定
+const dialogVisible = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
 })
 
-const rules = {
-  name: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
-  contactPerson: [{ required: true, message: '请输入联系人', trigger: 'blur' }],
-  contactPhone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
-  address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
-  ]
-}
-
-watch(() => props.visible, (val) => {
+// 替换所有visible引用为modelValue
+watch(() => props.modelValue, (val) => {
   if (val && props.customer) {
     form.value = { ...props.customer }
   } else if (val) {
@@ -109,7 +96,7 @@ watch(() => props.visible, (val) => {
 })
 
 function reset() {
-  emit('update:visible', false)
+  dialogVisible.value = false
 }
 
 const modeTitle = computed(() => {
@@ -127,7 +114,7 @@ async function onSubmit() {
       await updateCustomer(form.value)
       ElMessage.success('编辑成功')
     }
-    emit('update:visible', false)
+    emit('update:modelValue', false)
     emit('refresh')
   } catch (error) {
     console.error('提交失败:', error)
