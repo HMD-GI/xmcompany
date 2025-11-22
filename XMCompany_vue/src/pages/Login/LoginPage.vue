@@ -101,7 +101,7 @@ const onLogin = async () => {
     if (res.data.code === 0) {
       // 如果选择了记住我，可以在这里设置相关逻辑
       userStore.setToken(res.data.data.token)
-      userStore.setUserInfo(res.data.data.userInfo)
+      userStore.setUserInfo(res.data.data)
       ElMessage.success('登录成功')
       router.push('/')
     } else {

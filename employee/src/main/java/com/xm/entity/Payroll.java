@@ -27,7 +27,7 @@ public class Payroll implements Serializable {
     
     private String bankName; // 开户银行
     
-    private String payrollMonth; // 薪资月份（格式：yyyy-MM）
+    private String payrollMonth; // 薪资月份（格式：yyyy-MM）/
     
     private BigDecimal basicSalary; // 基本工资
     

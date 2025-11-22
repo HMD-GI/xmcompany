@@ -15,7 +15,6 @@ import com.xm.result.Result;
 import com.xm.service.LeaveService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.vo.LeaveVO;
-import com.xm.websocket.WebSocketServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,8 +42,6 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
     @Autowired
     private RedisIdGenerator redisIdGenerator;
 
-    @Autowired
-    private WebSocketServer webSocketServer;
     
     // 请假类型映射
     private static final Map<String, String> LEAVE_TYPE_MAP = new HashMap<>();
@@ -124,7 +121,7 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
             Map map = new HashMap<>();
             map.put("type", 1);
             map.put("content", "员工:" + employee.getName() + " 提交了请假申请，请及时审核。");
-            webSocketServer.sendToAllClient(JSON.toJSONString(map));
+//            webSocketServer.sendToAllClient(JSON.toJSONString(map));
             return Result.success("请假申请提交成功");
         }
         

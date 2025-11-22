@@ -26,7 +26,8 @@
         <module>purchase</module> <!--采购功能-->
         <module>stock</module>  <!--库存功能-->
         <module>produce</module><!--产品管理功能-->
-        <module>sale</module> <!--销售功能-->
+        <module>sale</module>
+        <module>chatMessage</module> <!--销售功能-->
     </modules>
 
 

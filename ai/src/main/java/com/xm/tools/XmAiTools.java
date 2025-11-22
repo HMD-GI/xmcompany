@@ -1,5 +1,6 @@
 package com.xm.tools;
 
+import com.xm.dto.CustomerQueryDTO;
 import com.xm.entity.Customer;
 import com.xm.entity.Employee;
 import com.xm.result.Result;
@@ -9,6 +10,7 @@ import com.xm.vo.CustomerVO;
 import com.xm.vo.EmployeeVO;
 import com.xm.page.page;
 import dev.langchain4j.agent.tool.Tool;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class XmAiTools {
 
     @Autowired
@@ -65,7 +68,7 @@ public class XmAiTools {
      * @return 客户列表分页数据
      */
     @Tool(name = "查询客户列表", value = "分页查询客户列表信息")
-    public Map<String, Object> queryCustomerList(int currentPage, int pageSize) {
+    public Map<String, Object> queryCustomerList(int currentPage, int pageSize, CustomerQueryDTO customerQueryDTO) {
         Map<String, Object> resultMap = new HashMap<>();
         
         try {
@@ -79,9 +82,11 @@ public class XmAiTools {
             }
             
             // 调用客户服务查询客户列表
-            Result<page<CustomerVO>> result = customerService.getCustomerList(currentPage, pageSize);
+            Result<page<CustomerVO>> result = customerService.getCustomerList(currentPage, pageSize,customerQueryDTO);
+
+            log.info(">>> code={}, msg={}", result.getCode(), result.getMsg());
             
-            if (result.getCode() == 1 && result.getData() != null) {
+            if (result.getCode() == 0 && result.getData() != null) {
                 // 查询成功
                 resultMap.put("success", true);
                 resultMap.put("data", result.getData());

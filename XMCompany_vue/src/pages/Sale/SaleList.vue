@@ -31,6 +31,7 @@
           <el-select 
             v-model="status" 
             placeholder="请选择状态"
+            style="width: 200px"
             clearable
             @clear="handleSearch"
           >

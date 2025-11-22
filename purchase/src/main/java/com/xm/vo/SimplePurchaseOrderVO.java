@@ -24,10 +24,9 @@ public class SimplePurchaseOrderVO {
 //    private BigDecimal unitPrice; // 单价
 //    private int quantity; // 采购数量
 //    private BigDecimal totalAmount; // 总金额
-//    private int status; // 采购订单状态
+    private int status; // 采购订单状态
 
-    private String statusName; // 状态名称
-
+//    private String statusName; // 状态名称
 //    private int purchaseRequestId; // 关联的采购申请ID
 //    private String applicant; // 申请人
 //    private String remark; // 备注

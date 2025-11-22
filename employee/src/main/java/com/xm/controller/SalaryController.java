@@ -46,6 +46,7 @@ public class SalaryController {
     /**
      * 生成月度工资单
      */
+    //TODO 设置定时任务自动生成工资单
     @Operation(summary = "生成月度工资单", description = "根据月份生成员工工资单，计算实际工资金额")
     @PostMapping("/payroll/generate")
     public Result generatePayroll(@RequestBody PayrollGenerationDTO generationDTO) {

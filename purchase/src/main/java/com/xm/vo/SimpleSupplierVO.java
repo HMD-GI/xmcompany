@@ -20,9 +20,9 @@ public class SimpleSupplierVO {
 //    private String address; // 地址
     private String productRange; // 产品范围
 
-//    private int status; // 供应商状态
+    private int status; // 供应商状态
 
-    private String statusName; // 状态名称/
+//    private String statusName; // 状态名称/
 
 //    private String bankAccount; // 银行账号
 //    private String bankName; // 开户银行

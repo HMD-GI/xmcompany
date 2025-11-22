@@ -39,12 +39,15 @@ public class JwtUtils {
      * @return JWT第二部分负载 payload 中存储的内容
      */
     public static Claims parseJWT(String jwt){
+        String token;
         if (!jwt.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("Invalid token format: missing Bearer prefix");
+            token=jwt;
+        }else{
+            // 如果有Bearer就提取Bearer后面的token部分
+            token = jwt.substring(7);
         }
         
-        // 提取Bearer后面的token部分
-        String token = jwt.substring(7);
+
         
         Claims claims = Jwts.parser()
                 .setSigningKey(signKey.getBytes())//指定签名密钥

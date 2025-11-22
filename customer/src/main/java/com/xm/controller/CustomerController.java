@@ -1,5 +1,6 @@
 package com.xm.controller;
 
+import com.xm.dto.CustomerQueryDTO;
 import com.xm.entity.Customer;
 import com.xm.page.page;
 import com.xm.result.Result;
@@ -7,12 +8,14 @@ import com.xm.service.CustomerService;
 import com.xm.vo.CustomerVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "客户管理", description = "客户信息的增删改查相关接口")
 @RestController
 @RequestMapping("/xm/customer")
+@Slf4j
 public class CustomerController {
 
     @Autowired
@@ -72,7 +75,9 @@ public class CustomerController {
     @GetMapping("/list")
     public Result<page<CustomerVO>> getCustomerList(
             @RequestParam(defaultValue = "1") int currentPage,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        return customerService.getCustomerList(currentPage, pageSize);
+            @RequestParam(defaultValue = "10") int pageSize,
+            CustomerQueryDTO queryDTO) {
+        log.info("分页查询客户列表动态数据queryDTO：" + queryDTO);
+        return customerService.getCustomerList(currentPage, pageSize, queryDTO);
     }
 } 

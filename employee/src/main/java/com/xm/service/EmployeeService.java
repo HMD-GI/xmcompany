@@ -1,6 +1,7 @@
 package com.xm.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xm.dto.ChangePasswordDTO;
 import com.xm.entity.Employee;
 import com.xm.result.Result;
 import com.xm.page.page;
@@ -44,4 +45,17 @@ public interface EmployeeService extends IService<Employee> {
      */
     Result<page<EmployeeVO>> getEmployeeList(int currentPage, int pageSize);
 
+    /**
+     * 重置员工密码
+     * @param id 员工ID
+     * @return Result
+     */
+    Result resetPassword(int id);
+
+    /**
+     * 修改员工密码
+     * @param changePasswordDTO 修改密码信息
+     * @return Result
+     */
+    Result changePassword(ChangePasswordDTO changePasswordDTO);
 }

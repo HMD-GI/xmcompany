@@ -16,8 +16,8 @@ public class SimplePurchaseRequestVO {
     private int quantity; // 采购数量
 
 //    private double budget; // 预算金额
-//    private int status; // 采购申请状态
-    private String statusName; // 状态名称
+    private int status; // 采购申请状态
+//    private String statusName; // 状态名称
 
 //    private String remark; // 备注
 //    private LocalDateTime createTime; // 创建时间

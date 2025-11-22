@@ -26,8 +26,8 @@ public class Customer implements Serializable {
     
     private String address; // 地址
     private String source; // 客户来源
-    private int level; // 客户等级
-    private int status; // 客户状态（1: 潜在客户, 2: 意向客户, 3: VIP客户, 4: 已成交客户）
+    private Integer level; // 客户等级
+    private Integer status; // 客户状态（1: 潜在客户, 2: 意向客户, 3: VIP客户, 4: 已成交客户）
     private LocalDateTime createTime; // 创建时间
     private LocalDateTime updateTime; // 更新时间
     private String remark; // 备注

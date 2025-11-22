@@ -79,7 +79,7 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
         }
 
         // 创建锁对象
-        RLock lock = redissonClient.getLock("lock:stockIn:" + stockInDTO.getMaterialName());
+        RLock lock = redissonClient.getLock("lock:stock:" + stockInDTO.getMaterialName());
         //获取锁对象
         boolean isLock = lock.tryLock();
         if (!isLock) {
@@ -148,11 +148,11 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
             stockOperationService.addStockOperation(operation);
         }catch (Exception e) {
             log.error("入库操作失败: {}", e.getMessage());
-            return Result.error("入库操作失败: " + e.getMessage());
+            throw new RuntimeException("入库操作失败: " + e.getMessage());
         }finally {
             lock.unlock();
         }
-        return Result.success();
+        return Result.success("操作成功");
     }
 
     /**
@@ -165,7 +165,8 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
     public Result stockOut(StockOutDTO stockOutDTO) {
         log.info("出库操作: {}", stockOutDTO);
 
-        RLock lock = redissonClient.getLock("lock:stockOut:" + stockOutDTO.getMaterialName());
+        //获取锁对象
+        RLock lock = redissonClient.getLock("lock:stock:" + stockOutDTO.getMaterialName());
         boolean isLock = lock.tryLock();
         if (!isLock) {
             try {
@@ -236,11 +237,12 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
             stockOperationService.addStockOperation(operation);
         }catch (Exception e) {
             log.error("出库操作失败: {}", e.getMessage());
-            return Result.error("出库操作失败: " + e.getMessage());
+            throw new RuntimeException("出库操作失败: " + e.getMessage());
+
         }finally {
             lock.unlock();
         }
-        return Result.success();
+        return Result.success("操作成功");
     }
 
     /**
@@ -267,37 +269,56 @@ public class StockServiceImpl extends ServiceImpl<StockMapper, Stock> implements
         }
         
         LocalDateTime now = LocalDateTime.now();
-        
-        // 如果修改了库存数量，记录调整操作
-        if (existStock.getQuantity() != stock.getQuantity()) {
-            // 生成操作编号
-            String operationNo = generateOperationNo("ADJ");
-            
-            // 记录库存调整操作
-            StockOperation operation = new StockOperation();
-            operation.setId(redisIdGenerator.generateId("stock_operation"));
-            operation.setOperationNo(operationNo);
-            operation.setStockId(stock.getId());
-            operation.setOperationType(2); // 2:库存调整
-            operation.setQuantity(Math.abs(stock.getQuantity() - existStock.getQuantity()));
-            operation.setBeforeQuantity(existStock.getQuantity());
-            operation.setAfterQuantity(stock.getQuantity());
-            operation.setOperatorId(operatorId);
-            operation.setOperatorName(operatorName);
-            operation.setRemark("库存数量调整");
-            operation.setOperationTime(now);
-            operation.setCreateTime(now);
-            
-            stockOperationService.addStockOperation(operation);
+
+        //获取锁对象
+        RLock lock = redissonClient.getLock("lock:stock:" + stock.getMaterialName());
+        boolean isLock = lock.tryLock();
+        if (!isLock) {
+            try {
+                Thread.sleep(3000);
+                updateStock(stock);
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+
+        try {
+            // 如果修改了库存数量，记录调整操作
+            if (existStock.getQuantity() != stock.getQuantity()) {
+                // 生成操作编号
+                String operationNo = generateOperationNo("ADJ");
+
+                // 记录库存调整操作
+                StockOperation operation = new StockOperation();
+                operation.setId(redisIdGenerator.generateId("stock_operation"));
+                operation.setOperationNo(operationNo);
+                operation.setStockId(stock.getId());
+                operation.setOperationType(2); // 2:库存调整
+                operation.setQuantity(Math.abs(stock.getQuantity() - existStock.getQuantity()));
+                operation.setBeforeQuantity(existStock.getQuantity());
+                operation.setAfterQuantity(stock.getQuantity());
+                operation.setOperatorId(operatorId);
+                operation.setOperatorName(operatorName);
+                operation.setRemark("库存数量调整");
+                operation.setOperationTime(now);
+                operation.setCreateTime(now);
+
+                stockOperationService.addStockOperation(operation);
+            }
+
+            // 设置更新时间
+            stock.setUpdateTime(now);
+
+            // 更新库存信息
+            this.updateById(stock);
+        }catch (Exception e) {
+            log.error("库存信息更新失败: {}", e.getMessage());
+            throw new RuntimeException("库存信息更新失败: " + e.getMessage());
+        }finally {
+            lock.unlock();
         }
         
-        // 设置更新时间
-        stock.setUpdateTime(now);
-        
-        // 更新库存信息
-        this.updateById(stock);
-        
-        return Result.success();
+        return Result.success("库存信息更新成功");
     }
 
     /**

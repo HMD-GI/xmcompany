@@ -15,6 +15,7 @@
         <module name="employee" />
         <module name="stock" />
         <module name="produce" />
+        <module name="chatMessage" />
         <module name="customer" />
       </profile>
     </annotationProcessing>
@@ -27,6 +28,7 @@
       <module name="Login" options="-parameters" />
       <module name="XMCompany" options="" />
       <module name="ai" options="-parameters" />
+      <module name="chatMessage" options="-parameters" />
       <module name="common" options="-parameters" />
       <module name="customer" options="-parameters" />
       <module name="employee" options="-parameters" />

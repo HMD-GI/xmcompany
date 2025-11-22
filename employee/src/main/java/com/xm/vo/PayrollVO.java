@@ -48,9 +48,9 @@ public class PayrollVO implements Serializable {
 //
     private BigDecimal actualAmount; // 实发金额
     
-//    private int status; // 状态
+    private int status; // 状态（0:待发放, 1:已发放, 2:已撤销）
     
-    private String statusDesc; // 状态描述
+//    private String statusDesc; // 状态描述
     
 //    private String remark; // 备注
     

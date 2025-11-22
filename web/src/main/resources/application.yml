@@ -50,13 +50,21 @@ knife4j:
   setting:
     language: zh_cn
 
+#logging:
+##  level:
+##    root: debug
+##    org:
+##      springframework:
+##        context: DEBUG
+##    com.xm: DEBUG
+
 logging:
   level:
-    root: debug
-    org:
-      springframework:
-        context: DEBUG
-    com.xm: DEBUG
+    root: info                     # 1. 全局默认只打 INFO+
+    org.springframework.context: debug
+    com.xm: debug                  # 2. 自己的业务模块继续 DEBUG
+    org.redisson: warn             # 3. 屏蔽 Redisson 心跳
+    org.mongodb.driver: info       # 4. 屏蔽 MongoDB 集群轮询
 
 #langchain4j模型
 langchain4j:

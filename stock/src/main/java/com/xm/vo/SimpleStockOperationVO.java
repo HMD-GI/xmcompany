@@ -16,8 +16,8 @@ public class SimpleStockOperationVO {
 
 //    private String unit; // 单位
 //    private int stockId; // 库存ID
-//    private int operationType; // 操作类型（0:入库, 1:出库, 2:库存调整）
-    private String operationTypeName; // 操作类型名称
+    private int operationType; // 操作类型（0:入库, 1:出库, 2:库存调整）
+//    private String operationTypeName; // 操作类型名称
     private int quantity; // 操作数量
 
 //    private int beforeQuantity; // 操作前库存数量

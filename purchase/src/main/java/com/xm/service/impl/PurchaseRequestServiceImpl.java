@@ -39,6 +39,7 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
      * @param request 采购申请信息
      * @return Result
      */
+    //TODO 采购申请成功时，使用WebSocket发送信息
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result addPurchaseRequest(PurchaseRequest request) {

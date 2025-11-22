@@ -3,8 +3,10 @@ package com.xm.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xm.dto.ChangePasswordDTO;
 import com.xm.entity.Employee;
 import com.xm.entity.employeeLogin;
+import com.xm.exception.PasswordChangeException;
 import com.xm.mapper.EmployeeMapper;
 import com.xm.result.Result;
 import com.xm.service.EmployeeService;
@@ -204,4 +206,84 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         
         return Result.success(result);
     }
+
+    /**
+     * 重置员工密码
+     * @param id 员工ID
+     * @return 重置结果
+     */
+    @Override
+    @Transactional // 启用事务
+    public Result resetPassword(int id) {
+        // 查询员工是否存在
+        Employee employee = employeeMapper.selectById(id);
+        if (employee == null) {
+            return Result.error("员工不存在");
+        }
+
+        // 设置新密码
+        String newPassword = "xm123456";
+        employee.setPassword(newPassword);
+
+        // 更新员工表密码
+        if (employeeMapper.updateById(employee) > 0) {
+            // 获取登录信息并更新密码
+            employeeLogin login = loginService.getByEmployeeId(id);
+            if (login != null) {
+                login.setPassword(newPassword);
+                if (loginService.updateById(login)) {
+                    return Result.success("密码重置成功");
+                } else {
+                    return Result.error("登录信息密码重置失败");
+                }
+            } else {
+                return Result.error("登录信息不存在");
+            }
+        }
+        return Result.error("密码重置失败");
+    }
+
+    /**
+     * 修改员工密码
+     * @param changePasswordDTO 修改密码信息
+     * @return Result
+     */
+    @Override
+    @Transactional // 启用事务
+    public Result changePassword(ChangePasswordDTO changePasswordDTO) {
+        //查询员工是否存在
+        Employee employee = employeeMapper.selectById(changePasswordDTO.getId());
+        if (employee == null) {
+            throw new PasswordChangeException("员工不存在");
+        }
+        //验证旧密码
+        if (employee.getPassword().equals(changePasswordDTO.getOldPassword())) {
+            employee.setPassword(changePasswordDTO.getNewPassword());
+            //更新员工表密码
+            if (employeeMapper.updateById(employee) > 0) {
+                // 获取登录信息并更新密码
+                employeeLogin login = loginService.getByEmployeeId(employee.getId());
+                if (login != null) {
+                    login.setPassword(changePasswordDTO.getNewPassword());
+                    if (loginService.updateById(login)) {
+                        return Result.success("密码修改成功");
+                    } else {
+                        throw new PasswordChangeException("登录信息不存在");
+                    }
+                } else {
+                    throw new PasswordChangeException("登录信息不存在");
+                    //return Result.error("登录信息不存在");
+                }
+
+            } else {
+//                    return Result.error("密码修改失败");
+                throw new PasswordChangeException("密码修改失败");
+            }
+        }else {
+            throw new PasswordChangeException("原密码不正确");
+        }
+
+    }
+
+
 }

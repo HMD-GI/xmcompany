@@ -591,7 +591,7 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
 //        payrollVO.setTotalDeduction(totalDeduction);
         
         // 设置状态描述
-        payrollVO.setStatusDesc(PAYROLL_STATUS_MAP.getOrDefault(payroll.getStatus(), "未知"));
+//        payrollVO.setStatusDesc(PAYROLL_STATUS_MAP.getOrDefault(payroll.getStatus(), "未知"));
         
         return payrollVO;
     }

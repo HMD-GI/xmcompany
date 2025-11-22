@@ -1,6 +1,7 @@
 package com.xm.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xm.dto.CustomerQueryDTO;
 import com.xm.entity.Customer;
 import com.xm.page.page;
 import com.xm.result.Result;
@@ -41,5 +42,5 @@ public interface CustomerService extends IService<Customer> {
      * @param pageSize 每页显示数量
      * @return Result<page<CustomerVO>> 分页结果
      */
-    Result<page<CustomerVO>> getCustomerList(int currentPage, int pageSize);
+    Result<page<CustomerVO>> getCustomerList(int currentPage, int pageSize, CustomerQueryDTO queryDTO);
 } 

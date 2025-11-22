@@ -1,5 +1,6 @@
 package com.xm.controller;
 
+import com.xm.dto.ChangePasswordDTO;
 import com.xm.result.Result;
 import com.xm.service.EmployeeService;
 import com.xm.entity.Employee;
@@ -99,4 +100,27 @@ public class EmployeeController {
         }
         return Result.error("未找到该员工");
     }
+
+    /**
+     * 重置员工密码
+     * @param id 员工ID
+     * @return Result
+     */
+    @Operation(summary = "重置员工密码", description = "将指定员工的密码重置为默认密码xm123456")
+    @PutMapping("/reset-password/{id}")
+    public Result resetPassword(@PathVariable int id) {
+        return employeeService.resetPassword(id);
+    }
+
+    /**
+     * 修改员工密码
+     * @param changePasswordDTO 修改密码信息
+     * @return Result
+     */
+    @Operation(summary = "修改员工密码", description = "修改员工密码")
+    @PutMapping("/change-password")
+    public Result changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
+        return employeeService.changePassword(changePasswordDTO);
+    }
+
 }

@@ -51,9 +51,6 @@
                 <if test="query.operatorId != null">
                     AND so.operator_id = #{query.operatorId}
                 </if>
-                <if test="query.relatedOrderNo != null and query.relatedOrderNo != ''">
-                    AND so.related_order_no LIKE CONCAT('%', #{query.relatedOrderNo}, '%')
-                </if>
                 <if test="query.startTime != null">
                     AND so.operation_time >= #{query.startTime}
                 </if>

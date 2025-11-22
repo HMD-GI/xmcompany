@@ -3,6 +3,7 @@ package com.xm.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xm.dto.CustomerQueryDTO;
 import com.xm.entity.Customer;
 import com.xm.mapper.CustomerMapper;
 import com.xm.page.page;
@@ -121,25 +122,17 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
      */
     // TODO 分页查询客户列表改为动态条件查询
     @Override
-    public Result<page<CustomerVO>> getCustomerList(int currentPage, int pageSize) {
+    public Result<page<CustomerVO>> getCustomerList(int currentPage, int pageSize, CustomerQueryDTO queryDTO) {
         // 创建分页对象
         Page<Customer> pageInfo = new Page<>(currentPage, pageSize);
-        
-        // 创建查询条件
-        LambdaQueryWrapper<Customer> queryWrapper = new LambdaQueryWrapper<>();
-        // 可以根据需求添加排序条件，例如按创建时间倒序排列
-        queryWrapper.orderByDesc(Customer::getCreateTime);
+
         
         // 执行分页查询
-        Page<Customer> customerPage = customerMapper.selectPage(pageInfo, queryWrapper);
+        Page<CustomerVO> customerPage = customerMapper.selectCustomerPage(pageInfo,queryDTO);
         System.out.println(customerPage.getRecords());
         
         // 将Customer列表转换为CustomerVO列表
-        List<CustomerVO> voList = customerPage.getRecords().stream().map(customer -> {
-            CustomerVO vo = new CustomerVO();
-            BeanUtils.copyProperties(customer, vo);
-            return vo;
-        }).collect(Collectors.toList());
+        List<CustomerVO> voList = customerPage.getRecords();
         
         // 创建自定义分页对象
         page<CustomerVO> result = new page<>();

@@ -13,6 +13,12 @@ export const useUserStore = defineStore('user', {
       }
     })()
   }),
+  getters: {
+    userId: (state) => state.userInfo.id || null,
+    username: (state) => state.userInfo.name || '',
+    role: (state) => state.userInfo.role || '',
+    isLoggedIn: (state) => !!state.token
+  },
   actions: {
     setToken(token) {
       this.token = token
