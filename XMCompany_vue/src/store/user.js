@@ -14,7 +14,7 @@ export const useUserStore = defineStore('user', {
     })()
   }),
   getters: {
-    userId: (state) => state.userInfo.id || null,
+    userId: (state) => state.userInfo.id || state.userInfo.employeeId || null,
     username: (state) => state.userInfo.name || '',
     role: (state) => state.userInfo.role || '',
     isLoggedIn: (state) => !!state.token
@@ -35,4 +35,4 @@ export const useUserStore = defineStore('user', {
       localStorage.removeItem('userInfo')
     }
   }
-}) 
+})

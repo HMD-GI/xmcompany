@@ -1,6 +1,7 @@
 package com.xm.controller;
 
 import com.xm.dto.LeaveApplyDTO;
+import com.xm.dto.LeaveQueryDTO;
 import com.xm.dto.LeaveReviewDTO;
 import com.xm.entity.Leave;
 import com.xm.page.page;
@@ -63,20 +64,18 @@ public class LeaveController {
     
     /**
      * 分页查询请假列表
-     * @param currentPage 当前页码
-     * @param pageSize 每页记录数
-     * @param employeeId 员工ID（可选）
-     * @param status 状态（可选）
+     * @param currentPage 当前页码，默认为 1
+     * @param pageSize 每页记录数，默认为 10
+     * @param queryDTO 查询条件（员工 ID、员工姓名、状态）
      * @return Result<page<LeaveVO>>
      */
-    @Operation(summary = "分页查询请假列表", description = "分页查询请假记录，可按员工ID和申请状态筛选")
+    @Operation(summary = "分页查询请假列表", description = "分页查询请假记录，可按员工 ID、员工姓名和申请状态筛选")
     @GetMapping("/list")
     public Result<page<LeaveVO>> getLeaveList(
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) Integer employeeId,
-            @RequestParam(required = false) Integer status) {
-        log.info("查询请假列表：页码={}, 每页记录数={}, 员工ID={}, 状态={}", currentPage, pageSize, employeeId, status);
-        return leaveService.getLeaveList(currentPage, pageSize, employeeId, status);
+            LeaveQueryDTO queryDTO) {
+        log.info("查询请假列表：页码={}, 每页记录数={}, 查询条件={}", currentPage, pageSize, queryDTO);
+        return leaveService.getLeaveList(currentPage, pageSize, queryDTO);
     }
 } 

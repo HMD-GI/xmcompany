@@ -120,7 +120,6 @@ public class CustomerServiceImpl extends ServiceImpl<CustomerMapper, Customer> i
      * @param pageSize 每页显示数量
      * @return Result<page<CustomerVO>> 分页结果
      */
-    // TODO 分页查询客户列表改为动态条件查询
     @Override
     public Result<page<CustomerVO>> getCustomerList(int currentPage, int pageSize, CustomerQueryDTO queryDTO) {
         // 创建分页对象

@@ -3,6 +3,7 @@ package com.xm.vo;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -21,7 +22,7 @@ public class SaleOrderVO {
     private BigDecimal amount; // 订单金额
     private int status; // 订单状态（0:待处理, 1:已确认, 2:已发货, 3:已完成, 4:已取消）
     private String statusName; // 订单状态名称
-    private LocalDateTime deliveryTime; // 交货时间
+    private LocalDate deliveryTime; // 交货时间
     private LocalDateTime shippingTime; // 发货时间
     private String operatorName; // 操作人姓名
     private String remark; // 备注

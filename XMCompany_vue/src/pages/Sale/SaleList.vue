@@ -31,7 +31,7 @@
           <el-select 
             v-model="status" 
             placeholder="请选择状态"
-            style="width: 200px"
+            style="width: 150px"
             clearable
             @clear="handleSearch"
           >
@@ -100,12 +100,6 @@
               :icon="Delete" 
               @click="handleDelete(row)"
             >删除</el-button>
-            <el-button 
-              link 
-              type="primary" 
-              :icon="Edit" 
-              @click="handleModify(row)"
-            >修改</el-button>
             <el-dropdown 
               v-if="row.status !== 3 && row.status !== 4"
               @command="(command) => handleStatusUpdate(row, command)"
@@ -153,8 +147,8 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { getSaleOrderList, deleteSaleOrder, updateSaleOrderStatus } from '@/api/sale'
+import { ref, reactive, onMounted, watch } from 'vue'
+import { getSaleOrderList, deleteSaleOrder, updateSaleOrderStatus, getSaleOrderById, shipSaleOrder } from '@/api/sale'
 import SaleDetailDialog from './SaleDetailDialog.vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
@@ -165,14 +159,22 @@ import {
   EditPen, 
   Delete,
   Setting,
-  ArrowDown,
-  Edit
+  ArrowDown
 } from '@element-plus/icons-vue'
 
 // 对话框相关状态
 const dialogVisible = ref(false)
 const dialogMode = ref('add')
 const currentOrder = ref(null)
+
+// 关闭对话框时清理状态，保证下一次打开可以触发变更
+watch(dialogVisible, val => {
+  if (!val) {
+    // 清空上一次的订单数据和模式，这样再次打开时会重新赋值
+    currentOrder.value = null
+    dialogMode.value = ''
+  }
+})
 
 // 查询条件
 const orderNo = ref('') // 订单编号
@@ -280,21 +282,49 @@ function handleAdd() {
   dialogVisible.value = true
 }
 
-function handleDetail(row) {
+async function handleDetail(row) {
+  // 先重置dialog的可见状态，确保即便之前已经打开也能重新渲染
+  dialogVisible.value = false
   dialogMode.value = 'detail'
-  currentOrder.value = { ...row }
-  dialogVisible.value = true
+  currentOrder.value = null
+
+  // 调用后端接口获取完整数据
+  try {
+    const res = await getSaleOrderById(row.id)
+    if (res.data?.code === 0) {
+      currentOrder.value = res.data.data
+      dialogVisible.value = true
+    } else {
+      ElMessage.error(res.data?.msg || '获取订单详情失败')
+    }
+  } catch (error) {
+    console.error('获取订单详情失败:', error)
+    ElMessage.error('获取订单详情失败')
+  }
 }
 
-function handleEdit(row) {
+async function handleEdit(row) {
+  // 先关闭对话框，防止上一次open仍然为true导致后续无效
+  dialogVisible.value = false
   dialogMode.value = 'edit'
-  currentOrder.value = { ...row }
-  dialogVisible.value = true
-}
+  currentOrder.value = null
 
-function handleModify(row) {
-  dialogMode.value = 'modify'
-  currentOrder.value = { ...row }
+  // 优先调用后端接口获取最新完整数据
+  try {
+    const res = await getSaleOrderById(row.id)
+    if (res.data?.code === 0) {
+      currentOrder.value = res.data.data
+    } else {
+      // 如果接口调用失败，使用列表数据
+      currentOrder.value = { ...row }
+      ElMessage.warning('获取订单详情失败，使用列表数据')
+    }
+  } catch (error) {
+    console.error('获取订单详情失败:', error)
+    // 接口调用失败时使用列表数据
+    currentOrder.value = { ...row }
+    ElMessage.warning('获取订单详情失败，使用列表数据')
+  }
   dialogVisible.value = true
 }
 
@@ -340,15 +370,33 @@ function getNextStatusOptions(currentStatus) {
 // 处理状态更新
 async function handleStatusUpdate(row, newStatus) {
   try {
-    const res = await updateSaleOrderStatus({
-      id: row.id,
-      status: newStatus
-    })
-    if (res.data?.code === 0) {
-      ElMessage.success('状态更新成功')
-      fetchList()
+    // dropdown 传回来的 command 可能是字符串，强制转为数字
+    const statusNum = Number(newStatus)
+
+    // 如果是发货操作（状态=2），调用专门的发货接口
+    if (statusNum === 2) {
+      const res = await shipSaleOrder({
+        id: row.id,
+        remark: '订单发货'
+      })
+      if (res.data?.code === 0) {
+        ElMessage.success('发货成功')
+        fetchList()
+      } else {
+        ElMessage.error(res.data?.msg || '发货失败')
+      }
     } else {
-      ElMessage.error(res.data?.msg || '状态更新失败')
+      // 其他状态更新使用原有接口
+      const res = await updateSaleOrderStatus({
+        id: row.id,
+        status: statusNum
+      })
+      if (res.data?.code === 0) {
+        ElMessage.success('状态更新成功')
+        fetchList()
+      } else {
+        ElMessage.error(res.data?.msg || '状态更新失败')
+      }
     }
   } catch (error) {
     console.error('更新订单状态失败:', error)

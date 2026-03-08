@@ -173,7 +173,7 @@
         <el-form-item label="采购申请" prop="purchaseRequestId">
           <el-select 
             v-model="addForm.purchaseRequestId" 
-            placeholder="请选择采购申请（可选）" 
+            placeholder="请选择采购申请" 
             style="width: 100%"
             filterable
             remote
@@ -202,7 +202,11 @@
     </el-dialog>
 
     <el-table :data="list" style="width: 100%" v-loading="loading">
-      <el-table-column prop="id" label="ID" width="80" />
+      <el-table-column label="序号" width="80" align="center">
+        <template #default="{ $index }">
+          {{ $index + 1 }}
+        </template>
+      </el-table-column>
       <el-table-column prop="orderNo" label="订单编号" min-width="150" />
       <el-table-column prop="supplierName" label="供应商" min-width="150" />
       <el-table-column prop="itemName" label="物料名称" min-width="120" />
@@ -494,7 +498,8 @@ async function searchSuppliers(query = '') {
     const params = {
       currentPage: 1,
       pageSize: 50,
-      name: query
+      name: query,
+      status: 1
     }
     const res = await getSupplierList(params)
     if (res.data && res.data.code === 0) {
@@ -515,7 +520,8 @@ async function searchPurchaseRequests(query = '') {
     const params = {
       currentPage: 1,
       pageSize: 50,
-      itemName: query
+      itemName: query,
+      status: 2
     }
     const res = await getPurchaseRequestList(params)
     if (res.data && res.data.code === 0) {

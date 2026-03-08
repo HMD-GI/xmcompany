@@ -108,10 +108,14 @@
     </el-dialog>
 
     <el-table :data="list" style="width: 100%" v-loading="loading">
-      <el-table-column prop="id" label="ID" width="100" />
-      <el-table-column prop="materialName" label="物料名称" min-width="200" />
-      <el-table-column prop="unit" label="单位" width="150" />
-      <el-table-column prop="quantity" label="库存数量" width="150" />
+      <el-table-column label="序号" width="200" align="center">
+        <template #default="{ $index }">
+          {{ $index + 1 }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="materialName" label="物料名称" width="200" />
+      <el-table-column prop="unit" label="单位" width="200" />
+      <el-table-column prop="quantity" label="库存数量" width="200" />
       <el-table-column label="操作" width="300" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" size="small" @click="handleDetail(row)">详情</el-button>
@@ -137,7 +141,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getStockList, getStockById, stockIn, stockOut } from '@/api/stock'
+import { getStockList, getStockById, stockIn, stockOut, updateStock } from '@/api/stock'
 import { ElMessage } from 'element-plus'
 
 const query = ref({ currentPage: 1, pageSize: 10, materialName: '' })
@@ -211,16 +215,44 @@ function handleDetail(row) {
 // 处理编辑
 function handleEdit(row) {
   dialogMode.value = 'edit'
-  form.value = { ...row }
-  dialogVisible.value = true
+  getStockById(row.id).then(res => {
+    const ok = res && res.data && (res.data.code === 0 || res.data.success === true)
+    const data = ok ? (res.data.data || {}) : {}
+    if (!ok) {
+      ElMessage.error((res && res.data && res.data.msg) || '获取库存详情失败')
+      return
+    }
+    form.value = {
+      ...data,
+      lastStockInTime: data.lastStockInTime || '',
+      lastStockOutTime: data.lastStockOutTime || '',
+      createTime: data.createTime || '',
+      updateTime: data.updateTime || ''
+    }
+    dialogVisible.value = true
+  }).catch(() => {
+    ElMessage.error('获取库存详情失败')
+    // 即使获取失败，也使用行内数据作为备选
+    form.value = { ...row }
+    dialogVisible.value = true
+  })
 }
 
 // 处理提交
 function handleSubmit() {
-  // TODO: 调用更新库存的API
-  ElMessage.success('更新成功')
-  dialogVisible.value = false
-  fetchList() // 刷新列表
+  updateStock(form.value).then(res => {
+    const ok = res && res.data && (res.data.code === 0 || res.data.success === true)
+    if (ok) {
+      ElMessage.success('更新成功')
+      dialogVisible.value = false
+      fetchList() // 刷新列表
+    } else {
+      ElMessage.error((res && res.data && res.data.msg) || '更新失败')
+    }
+  }).catch(error => {
+    console.error('更新库存失败:', error)
+    ElMessage.error('更新失败')
+  })
 }
 
 function fetchList() {

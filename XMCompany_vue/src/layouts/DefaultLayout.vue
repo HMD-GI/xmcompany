@@ -67,7 +67,7 @@
             <el-icon><i class="el-icon-user-solid"></i></el-icon>
             <span>员工管理</span>
           </el-menu-item>
-          <el-menu-item v-if="userStore.role === 'ADMIN'" index="/leave">
+          <el-menu-item index="/leave">
             <el-icon><i class="el-icon-date"></i></el-icon>
             <span>请假管理</span>
           </el-menu-item>

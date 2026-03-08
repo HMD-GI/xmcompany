@@ -1,6 +1,7 @@
 package com.xm.controller;
 
 import com.xm.dto.ChangePasswordDTO;
+import com.xm.dto.EmployeeQueryDTO;
 import com.xm.result.Result;
 import com.xm.service.EmployeeService;
 import com.xm.entity.Employee;
@@ -28,10 +29,11 @@ public class EmployeeController {
     @Operation(summary = "添加员工", description = "新增员工信息，包括基本信息和账号信息")
     @PostMapping
     public Result addEmployee(@RequestBody Employee employee) {
-        if (employeeService.addEmployee(employee).getCode() == 1) {
-            return Result.success("员工添加成功");
+        Result result = employeeService.addEmployee(employee);
+        if (result.getCode() == 0) {
+            return Result.success(result.getMsg());
         }
-        return Result.error("员工添加失败");
+        return Result.error(result.getMsg());
     }
 
     /**
@@ -82,8 +84,9 @@ public class EmployeeController {
     @GetMapping("/list")
     public Result<page<EmployeeVO>> getEmployeeList(
             @RequestParam(defaultValue = "1") int currentPage,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        return employeeService.getEmployeeList(currentPage, pageSize);
+            @RequestParam(defaultValue = "10") int pageSize,
+            EmployeeQueryDTO queryDTO) {
+        return employeeService.getEmployeeList(currentPage, pageSize, queryDTO);
     }
 
     /**

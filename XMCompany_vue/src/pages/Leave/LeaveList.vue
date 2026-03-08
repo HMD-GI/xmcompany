@@ -5,19 +5,28 @@
       <el-button type="success" @click="openApplyDialog" icon="el-icon-plus">申请请假</el-button>
     </div>
     
-    <el-form :inline="true" @submit.prevent="fetchList" class="search-form">
-      <el-form-item label="员工ID">
-        <el-input v-model="query.employeeId" placeholder="输入员工ID" />
+    <el-form :inline="true" @submit.prevent="fetchList" class="search-form" v-if="isAdmin">
+      <el-form-item label="员工 ID">
+        <el-input v-model="query.employeeId" placeholder="输入员工 ID" clearable />
+      </el-form-item>
+      <el-form-item label="员工姓名">
+        <el-input v-model="query.employeeName" placeholder="输入员工姓名" clearable />
       </el-form-item>
       <el-form-item label="状态">
-        <el-input v-model="query.status" placeholder="输入状态" />
+        <el-select v-model="query.status" placeholder="选择状态" clearable style="width: 150px">
+          <el-option label="待审核" :value="0" />
+          <el-option label="已批准" :value="1" />
+          <el-option label="已拒绝" :value="2" />
+          <el-option label="已取消" :value="3" />
+        </el-select>
       </el-form-item>
       <el-button type="primary" @click="fetchList">查询</el-button>
+      <el-button @click="resetQuery">重置</el-button>
     </el-form>
 
     <el-table :data="list" style="width: 100%" v-loading="loading">
-      <!-- ID列 -->
-      <el-table-column prop="id" label="ID" width="60" />
+      <!-- 员工ID -->
+      <el-table-column prop="employeeId" label="员工ID" width="100" />
       <!-- 员工姓名 -->
       <el-table-column prop="employeeName" label="员工姓名" />
       <!-- 请假类型 -->
@@ -42,8 +51,8 @@
       <el-table-column label="操作" width="150">
         <template #default="scope">
           <el-button size="small" @click="openDetail(scope.row)">详情</el-button>
-          <!-- 审核按钮 -->
-          <el-button size="small" type="primary" @click="openApproveDialog(scope.row)" v-if="scope.row.status === 0">审核</el-button>
+          <!-- 审核按钮：只有管理员且状态为待审核时才显示 -->
+          <el-button size="small" type="primary" @click="openApproveDialog(scope.row)" v-if="isAdmin && scope.row.status === 0">审核</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -87,8 +96,11 @@
     <!-- 申请请假弹窗 -->
     <el-dialog title="申请请假" v-model="applyDialogVisible" width="600px">
       <el-form :model="applyForm" ref="applyFormRef" label-width="100px" :rules="applyRules">
-        <el-form-item label="员工ID" prop="employeeId">
-          <el-input v-model="applyForm.employeeId" placeholder="请输入员工ID" />
+        <el-form-item label="员工 ID" prop="employeeId" v-if="isAdmin">
+          <el-input v-model="applyForm.employeeId" placeholder="请输入员工 ID" />
+        </el-form-item>
+        <el-form-item label="员工 ID" prop="employeeId" v-else>
+          <el-input v-model="applyForm.employeeId" disabled />
         </el-form-item>
         <el-form-item label="请假类型" prop="leaveType">
           <el-select v-model="applyForm.leaveType" placeholder="请选择请假类型">
@@ -135,16 +147,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getLeaveList, reviewLeave, getLeaveById, applyLeave } from '@/api/leave'
 import dayjs from 'dayjs'
 import LeaveDetailDialog from './LeaveDetailDialog.vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
+import { useUserStore } from '@/store/user'
 
-const query = ref({ currentPage: 1, pageSize: 10, employeeId: '', status: '' })
+const query = ref({ currentPage: 1, pageSize: 10, employeeId: '', employeeName: '', status: null })
 const list = ref([])
 const total = ref(0)
 const loading = ref(false)
+
+// 获取用户信息
+const userStore = useUserStore()
+const isAdmin = computed(() => userStore.role === 'ADMIN')
 
 // 控制详情弹窗显示
 const detailDialogVisible = ref(false)
@@ -190,8 +207,30 @@ const applyRules = {
   ]
 }
 
+function resetQuery() {
+  // USER 角色只能查询自己的数据，不能重置
+  if (!isAdmin.value) {
+    query.value.employeeId = userStore.userId
+    query.value.employeeName = ''
+    query.value.status = null
+  } else {
+    query.value.employeeId = ''
+    query.value.employeeName = ''
+    query.value.status = null
+  }
+  fetchList()
+}
+
 function fetchList() {
   loading.value = true
+  
+  // 如果是 USER 角色，只查询自己的请假记录
+  if (!isAdmin.value) {
+    query.value.employeeId = userStore.userId
+    query.value.employeeName = '' // 清空姓名查询条件
+    query.value.status = null // 清空状态查询条件
+  }
+  
   getLeaveList(query.value).then(res => {
     if (res.data && res.data.code === 0) {
       const data = res.data.data || { list: [], total: 0 }
@@ -262,12 +301,24 @@ async function submitReview() {
 // 打开申请请假弹窗
 function openApplyDialog() {
   // 重置表单
-  applyForm.value = {
-    employeeId: '',
-    leaveType: '',
-    startTime: '',
-    endTime: '',
-    reason: ''
+  if (isAdmin.value) {
+    // 管理员可以为其他员工申请
+    applyForm.value = {
+      employeeId: '',
+      leaveType: '',
+      startTime: '',
+      endTime: '',
+      reason: ''
+    }
+  } else {
+    // USER 角色只能为自己申请
+    applyForm.value = {
+      employeeId: userStore.userId || '',
+      leaveType: '',
+      startTime: '',
+      endTime: '',
+      reason: ''
+    }
   }
   applyDialogVisible.value = true
 }
@@ -278,8 +329,15 @@ async function submitApply() {
     // 表单验证
     await applyFormRef.value.validate()
     
+    // 直接使用表单数据（已经通过 value-format 正确格式化）
+    const formData = {
+      ...applyForm.value,
+      startTime: dayjs(applyForm.value.startTime).format('YYYY-MM-DD HH:mm:ss'),
+      endTime: dayjs(applyForm.value.endTime).format('YYYY-MM-DD HH:mm:ss')
+    }
+    
     // 调用申请 API
-    const res = await applyLeave(applyForm.value)
+    const res = await applyLeave(formData)
     if (res.data && res.data.code === 0) {
       ElMessage.success('请假申请提交成功')
       applyDialogVisible.value = false

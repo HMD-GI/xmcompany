@@ -19,10 +19,8 @@ public class LeaveVO implements Serializable {
     
     private String leaveType; // 请假类型
     
-//    private String leaveTypeDesc; // 请假类型描述
-//
-//    private LocalDateTime startTime; // 请假开始时间
-
+    private LocalDateTime startTime; // 请假开始时间
+    
     private LocalDateTime endTime; // 请假结束时间
 //
 //    private String reason; // 请假原因

@@ -2,7 +2,9 @@ package com.xm.controller;
 
 import com.xm.dto.PayrollAdjustmentDTO;
 import com.xm.dto.PayrollGenerationDTO;
+import com.xm.dto.PayrollQueryDTO;
 import com.xm.dto.SalaryDTO;
+import com.xm.dto.SalaryQueryDTO;
 import com.xm.entity.Payroll;
 import com.xm.page.page;
 import com.xm.result.Result;
@@ -11,6 +13,7 @@ import com.xm.vo.PayrollVO;
 import com.xm.vo.SalaryVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "薪资管理", description = "员工薪资配置和工资单管理相关接口")
 @RestController
 @RequestMapping("/xm/salary")
+@Slf4j
 public class SalaryController {
 
     @Autowired
@@ -41,6 +45,28 @@ public class SalaryController {
     @GetMapping("/config/{employeeId}")
     public Result<SalaryVO> getSalaryConfig(@PathVariable int employeeId) {
         return salaryService.getSalaryByEmployeeId(employeeId);
+    }
+    
+    /**
+     * 分页查询薪资配置列表
+     */
+    @Operation(summary = "分页查询薪资配置列表", description = "分页查询薪资配置列表，支持多种条件筛选")
+    @GetMapping("/config/list")
+    public Result<page<SalaryVO>> getSalaryConfigList(
+            @RequestParam(defaultValue = "1") int currentPage,
+            @RequestParam(defaultValue = "10") int pageSize,
+            SalaryQueryDTO queryDTO) {
+        log.info("分页查询薪资配置列表动态数据queryDTO：" + queryDTO);
+        return salaryService.getSalaryConfigList(currentPage, pageSize, queryDTO);
+    }
+    
+    /**
+     * 更新员工薪资配置状态
+     */
+    @Operation(summary = "更新员工薪资配置状态", description = "更新员工薪资配置的状态（有效/无效）")
+    @PutMapping("/config/status/{id}")
+    public Result updateSalaryStatus(@PathVariable int id, @RequestParam int status) {
+        return salaryService.updateSalaryStatus(id, status);
     }
     
     /**
@@ -90,29 +116,28 @@ public class SalaryController {
     }
     
     /**
-     * 查询员工工资单列表
+     * 分页查询员工工资单列表（动态查询）
      */
-    @Operation(summary = "查询员工工资单列表", description = "分页查询指定员工的工资单记录，可按年月筛选")
-    @GetMapping("/payroll/list/employee/{employeeId}")
+    @Operation(summary = "分页查询员工工资单列表", description = "分页查询员工工资单列表，支持多种条件筛选")
+    @GetMapping("/payroll/list/employee")
     public Result<page<PayrollVO>> getEmployeePayrollList(
-            @PathVariable int employeeId,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer month,
             @RequestParam(defaultValue = "1") int currentPage,
-            @RequestParam(defaultValue = "10") int pageSize) {
-        return salaryService.getPayrollList(employeeId, year, month, currentPage, pageSize);
+            @RequestParam(defaultValue = "10") int pageSize,
+            PayrollQueryDTO queryDTO) {
+        log.info("分页查询员工工资单列表动态数据queryDTO：" + queryDTO);
+        return salaryService.getEmployeePayrollList(currentPage, pageSize, queryDTO);
     }
     
     /**
-     * 查询月度工资单列表
+     * 分页查询月度工资单列表（动态查询）
      */
-    @Operation(summary = "查询月度工资单列表", description = "分页查询指定月份的所有员工工资单，可按状态筛选")
-    @GetMapping("/payroll/list/month/{month}")
+    @Operation(summary = "分页查询月度工资单列表", description = "分页查询月度工资单列表，支持多种条件筛选")
+    @GetMapping("/payroll/list/month")
     public Result<page<PayrollVO>> getMonthlyPayrollList(
-            @PathVariable String month,
-            @RequestParam(required = false) Integer status,
             @RequestParam(defaultValue = "1") int currentPage,
-            @RequestParam(defaultValue = "20") int pageSize) {
-        return salaryService.getPayrollListByMonth(month, status, currentPage, pageSize);
+            @RequestParam(defaultValue = "20") int pageSize,
+            PayrollQueryDTO queryDTO) {
+        log.info("分页查询月度工资单列表动态数据queryDTO：" + queryDTO);
+        return salaryService.getMonthlyPayrollList(currentPage, pageSize, queryDTO);
     }
-} 
+}

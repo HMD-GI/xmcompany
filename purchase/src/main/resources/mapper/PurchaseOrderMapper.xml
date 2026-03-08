@@ -56,6 +56,9 @@
             <if test="query.supplierId != null">
                 AND po.supplier_id = #{query.supplierId}
             </if>
+            <if test="query.supplierName != null and query.supplierName != ''">
+                AND s.name LIKE CONCAT('%', #{query.supplierName}, '%')
+            </if>
             <if test="query.itemName != null and query.itemName != ''">
                 AND po.item_name LIKE CONCAT('%', #{query.itemName}, '%')
             </if>

@@ -1,5 +1,6 @@
 package com.xm.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -34,11 +35,14 @@ public class SalaryVO implements Serializable {
     
     private String statusDesc; // 状态描述
     
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime effectiveDate; // 生效日期
     
     private String remark; // 备注
     
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime; // 创建时间
     
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime updateTime; // 更新时间
 } 

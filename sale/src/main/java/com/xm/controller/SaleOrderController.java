@@ -88,8 +88,8 @@ public class SaleOrderController {
 
     /**
      * 分页查询销售订单列表
-     * @param currentPage 当前页码，默认为1
-     * @param pageSize 每页显示数量，默认为10
+     * @param currentPage 当前页码，默认为 1
+     * @param pageSize 每页显示数量，默认为 10
      * @param queryDTO 查询条件
      * @return Result<page<SaleOrderVO>>
      */
@@ -99,7 +99,19 @@ public class SaleOrderController {
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
             SaleOrderQueryDTO queryDTO) {
-        log.info("分页查询销售订单列表: 页码={}, 每页数量={}, 查询条件={}", currentPage, pageSize, queryDTO);
+        log.info("分页查询销售订单列表：页码={}, 每页数量={}, 查询条件={}", currentPage, pageSize, queryDTO);
         return saleOrderService.getSaleOrderList(currentPage, pageSize, queryDTO);
+    }
+
+    /**
+     * 删除销售订单
+     * @param id 订单 ID
+     * @return Result
+     */
+    @Operation(summary = "删除销售订单", description = "根据 ID 删除销售订单")
+    @DeleteMapping("/order/{id}")
+    public Result deleteSaleOrder(@PathVariable int id) {
+        log.info("删除销售订单，ID: {}", id);
+        return saleOrderService.deleteSaleOrder(id);
     }
 }

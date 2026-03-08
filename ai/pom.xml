@@ -37,6 +37,12 @@
             <artifactId>langchain4j-community-dashscope-spring-boot-starter</artifactId>
         </dependency>
 
+        <!--集成Pinecone-->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-pinecone</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.xm</groupId>
             <artifactId>common</artifactId>

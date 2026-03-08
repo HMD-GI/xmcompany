@@ -50,7 +50,7 @@ router.beforeEach((to, from, next) => {
     // 如果用户未登录，且访问的不是登录页，则重定向到登录页
     next({ path: '/login' })
   } else {
-    const adminOnlyRoutes = ['/employee', '/leave', '/salary']
+    const adminOnlyRoutes = ['/employee', '/salary']
     if (isLoggedIn && adminOnlyRoutes.includes(to.path) && userStore.role !== 'ADMIN') {
       // 如果用户已登录但不是管理员，访问管理员专属页面则重定向到主页
       next({ path: '/' })

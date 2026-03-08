@@ -52,7 +52,7 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
         // 默认状态为草稿
         request.setStatus(0);
         this.save(request);
-        return Result.success("新增采购申请成功");
+        return Result.success(id);
     }
 
     /**
@@ -77,7 +77,7 @@ public class PurchaseRequestServiceImpl extends ServiceImpl<PurchaseRequestMappe
         }
         request.setUpdateTime(LocalDateTime.now());
         this.updateById(request);
-        return Result.success("更新采购申请成功");
+        return Result.success(request.getId());
     }
 
     /**

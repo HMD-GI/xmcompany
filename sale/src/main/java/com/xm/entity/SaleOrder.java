@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -44,7 +45,7 @@ public class SaleOrder implements Serializable {
     private int status; // 订单状态（0:待处理, 1:已确认, 2:已发货, 3:已完成, 4:已取消）
     
     @TableField("delivery_time")
-    private LocalDateTime deliveryTime; // 交货时间
+    private LocalDate deliveryTime; // 交货时间
     
     @TableField("shipping_time")
     private LocalDateTime shippingTime; // 发货时间

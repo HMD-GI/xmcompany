@@ -126,6 +126,7 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
         
         // 检查订单状态，只有待处理和已确认状态的订单才能修改
+
         if (existOrder.getStatus() > 1) {
             return Result.error("当前订单状态不允许修改");
         }
@@ -173,8 +174,14 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         }
         
         // 调用库存模块的出库接口
+        // 先检查产品库存是否存在
+        StockVO stock = stockService.getStockByProductName(existOrder.getProductName());
+        if (stock == null) {
+            return Result.error("产品 " + existOrder.getProductName() + " 的库存信息不存在");
+        }
+        
         StockOutDTO stockOutDTO = new StockOutDTO();
-        stockOutDTO.setStockId(stockService.getStockByProductName(existOrder.getProductName()).getId());
+        stockOutDTO.setStockId(stock.getId());
         stockOutDTO.setMaterialName(existOrder.getProductName());
         stockOutDTO.setUnit(existOrder.getUnit());
         stockOutDTO.setQuantity(existOrder.getQuantity());
@@ -276,8 +283,8 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
             return Result.error("订单不存在");
         }
 
-        // 检查订单状态，只有待处理和已确认状态的订单才能修改状态
-        if (existOrder.getStatus() > 1) {
+        // 检查订单状态，只有待处理和已确认状态的订单才能修改状态或者已发货改为已完成可以修改
+        if (!(existOrder.getStatus() < 2 || (existOrder.getStatus() == 2 && statusUpdateDTO.getStatus() == 3))){
             return Result.error("当前订单状态不允许修改");
         }
         // 判断库存数量是否达到目标数量
@@ -296,7 +303,38 @@ public class SaleOrderServiceImpl extends ServiceImpl<SaleOrderMapper, SaleOrder
         // 更新订单状态
         updateById(existOrder);
 
-        log.info("订单状态更新成功，订单ID：{}，新状态：{}", statusUpdateDTO.getId(), statusUpdateDTO.getStatus());
+        log.info("订单状态更新成功，订单 ID：{}，新状态：{}", statusUpdateDTO.getId(), statusUpdateDTO.getStatus());
+        return Result.success();
+    }
+
+    /**
+     * 删除销售订单
+     * @param id 订单 ID
+     * @return Result
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result deleteSaleOrder(int id) {
+        // 参数校验
+        if (id <= 0) {
+            return Result.error("订单 ID 无效");
+        }
+        
+        // 查询订单是否存在
+        SaleOrder existOrder = getById(id);
+        if (existOrder == null) {
+            return Result.error("订单不存在");
+        }
+        
+        // 检查订单状态，只有待处理和已取消状态的订单才能删除
+        if (existOrder.getStatus() != 0 && existOrder.getStatus() != 4) {
+            return Result.error("当前订单状态不允许删除");
+        }
+        
+        // 删除订单
+        removeById(id);
+        
+        log.info("删除销售订单成功，订单 ID：{}", id);
         return Result.success();
     }
 
