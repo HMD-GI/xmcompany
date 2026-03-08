@@ -44,7 +44,11 @@
       stripe
       highlight-current-row
       class="customer-table">
-      <el-table-column prop="id" label="ID" width="60" />
+      <el-table-column label="序号" width="80" align="center">
+        <template #default="{ $index }">
+          {{ $index + 1 }}
+        </template>
+      </el-table-column>
       <el-table-column prop="name" label="客户名称" min-width="120" />
       <el-table-column prop="contactPerson" label="联系人" min-width="100" />
       <el-table-column prop="phone" label="联系电话" min-width="120" />
@@ -261,4 +265,6 @@ onMounted(fetchList)
   margin-top: 20px;
   text-align: right;
 }
+
+
 </style>

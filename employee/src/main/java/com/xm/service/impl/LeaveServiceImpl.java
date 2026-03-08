@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xm.dto.LeaveApplyDTO;
+import com.xm.dto.LeaveQueryDTO;
 import com.xm.dto.LeaveReviewDTO;
 import com.xm.entity.Employee;
 import com.xm.entity.Leave;
@@ -186,43 +187,47 @@ public class LeaveServiceImpl extends ServiceImpl<LeaveMapper, Leave> implements
      * 获取请假列表
      * @param currentPage 当前页码
      * @param pageSize 每页显示数量
-     * @param employeeId 员工ID，可为空
-     * @param status 请假状态，可为空
+     * @param queryDTO 查询条件（员工 ID、员工姓名、状态）
      * @return 请假分页列表
      */
     // TODO 添加一个请假类型
     @Override
-    public Result<page<LeaveVO>> getLeaveList(int currentPage, int pageSize, Integer employeeId, Integer status) {
+    public Result<page<LeaveVO>> getLeaveList(int currentPage, int pageSize, LeaveQueryDTO queryDTO) {
         // 创建查询条件
         LambdaQueryWrapper<Leave> queryWrapper = new LambdaQueryWrapper<>();
-        
+            
         // 添加筛选条件
-        if (employeeId != null) {
-            queryWrapper.eq(Leave::getEmployeeId, employeeId);
+        if (queryDTO.getEmployeeId() != null) {
+            queryWrapper.eq(Leave::getEmployeeId, queryDTO.getEmployeeId());
         }
-        
-        if (status != null) {
-            queryWrapper.eq(Leave::getStatus, status);
+            
+        if (queryDTO.getStatus() != null) {
+            queryWrapper.eq(Leave::getStatus, queryDTO.getStatus());
         }
-        
+            
+        // 如果员工姓名不为空，模糊查询
+        if (queryDTO.getEmployeeName() != null && !queryDTO.getEmployeeName().isEmpty()) {
+            queryWrapper.like(Leave::getEmployeeName, queryDTO.getEmployeeName());
+        }
+            
         // 按创建时间降序排序
         queryWrapper.orderByDesc(Leave::getCreateTime);
-        
+            
         // 执行分页查询
         Page<Leave> pageInfo = new Page<>(currentPage, pageSize);
         Page<Leave> leavePage = leaveMapper.selectPage(pageInfo, queryWrapper);
-        
-        // 转换为VO列表
+            
+        // 转换为 VO 列表
         List<LeaveVO> leaveVOList = leavePage.getRecords().stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
-        
+            
         // 创建自定义分页对象
         page<LeaveVO> result = new page<>();
         result.setPageSize(pageSize);
         result.setTotal((int) leavePage.getTotal());
         result.setList(leaveVOList);
-        
+            
         return Result.success(result);
     }
     

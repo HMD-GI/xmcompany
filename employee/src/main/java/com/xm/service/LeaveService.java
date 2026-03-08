@@ -2,6 +2,7 @@ package com.xm.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.dto.LeaveApplyDTO;
+import com.xm.dto.LeaveQueryDTO;
 import com.xm.dto.LeaveReviewDTO;
 import com.xm.entity.Leave;
 import com.xm.page.page;
@@ -38,9 +39,8 @@ public interface LeaveService extends IService<Leave> {
      * 分页查询请假列表
      * @param currentPage 当前页码
      * @param pageSize 每页记录数
-     * @param employeeId 员工ID（可选，不传则查询所有）
-     * @param status 状态（可选，不传则查询所有）
+     * @param queryDTO 查询条件（员工 ID、员工姓名、状态）
      * @return Result<page<LeaveVO>>
      */
-    Result<page<LeaveVO>> getLeaveList(int currentPage, int pageSize, Integer employeeId, Integer status);
+    Result<page<LeaveVO>> getLeaveList(int currentPage, int pageSize, LeaveQueryDTO queryDTO);
 } 

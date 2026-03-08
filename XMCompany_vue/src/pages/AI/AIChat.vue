@@ -24,7 +24,7 @@
           </div>
           <div class="message-content">
             <div class="message-sender">{{ msg.role === 'user' ? '我' : 'AI助手' }}</div>
-            <div class="message-text">{{ msg.content }}</div>
+            <div class="message-text" v-html="renderMarkdown(msg.content)"></div>
             <div class="message-time">{{ msg.time }}</div>
           </div>
         </div>
@@ -56,12 +56,20 @@
 
 <script setup>
 import { ref, nextTick, onMounted, watch } from 'vue'
-import { aiChat } from '@/api/ai'
+import { aiChatStream } from '@/api/ai'
+import { marked } from 'marked'
 
 const input = ref('')
 const messages = ref([])
 const loading = ref(false)
 const chatContainer = ref(null)
+const eventSource = ref(null)
+
+// 配置marked选项
+marked.setOptions({
+  breaks: true,
+  gfm: true
+})
 
 // 格式化时间
 function formatTime() {
@@ -69,6 +77,12 @@ function formatTime() {
   const hours = now.getHours().toString().padStart(2, '0')
   const minutes = now.getMinutes().toString().padStart(2, '0')
   return `${hours}:${minutes}`
+}
+
+// 渲染Markdown内容
+function renderMarkdown(content) {
+  if (!content) return ''
+  return marked.parse(content)
 }
 
 // 滚动到顶部
@@ -102,24 +116,53 @@ async function send() {
   loading.value = true;
   
   try {
-    const res = await aiChat({ content: userInput });
+    // 创建AI消息占位符
     const aiMessage = { 
       role: 'ai', 
-      content: res.data, 
+      content: '', 
       time: formatTime() 
     };
-    // 立即推送AI消息
     messages.value.push(aiMessage);
+    
+    // 使用流式处理 - 实现逐字显示效果
+    let accumulatedContent = '';
+    await aiChatStream(
+      { content: userInput },
+      // 处理每个数据块
+      async (chunk) => {
+        if (chunk) {
+          accumulatedContent += chunk;
+          
+          // 逐字符显示，模拟打字效果
+          for (let i = 0; i < chunk.length; i++) {
+            aiMessage.content += chunk[i];
+            
+            // 等待DOM更新后滚动到底部
+            await nextTick();
+            scrollToBottom();
+            
+            // 添加轻微延迟营造打字效果（可以根据需要调整）
+            await new Promise(resolve => setTimeout(resolve, 20));
+          }
+        }
+      }
+    );
+    
+    // 确保所有内容都已显示
+    aiMessage.content = accumulatedContent;
+    
+    // AI回复完成后手动触发一次保存
+    saveMessages();
   } catch (error) {
     console.error('AI回复失败:', error);
-    messages.value.push({ 
-      role: 'ai', 
-      content: '抱歉，我遇到了一些问题，请稍后再试。', 
-      time: formatTime() 
-    });
+    // 更新最后一条消息（应该是AI消息）
+    const lastMessage = messages.value[messages.value.length - 1];
+    if (lastMessage.role === 'ai') {
+      lastMessage.content = '抱歉，我遇到了一些问题，请稍后再试。';
+    }
   } finally {
     loading.value = false;
-    // 等待AI消息渲染后滚动到底部
+    // 等待AI消息渲染后滚动到顶部
     await nextTick(() => {
       scrollToBottom();
     });
@@ -129,23 +172,48 @@ async function send() {
 // 清空对话
 function clearMessages() {
   messages.value = []
+  // 同时清除localStorage中的数据
+  localStorage.removeItem('aiChatMessages')
+  console.log('对话已清空，localStorage已清除')
 }
 
 // 初始化时从本地存储加载历史消息
 onMounted(() => {
+  console.log('组件挂载，尝试加载历史消息')
   const savedMessages = localStorage.getItem('aiChatMessages')
+  console.log('localStorage中的数据:', savedMessages)
+  
   if (savedMessages) {
     try {
-      messages.value = JSON.parse(savedMessages)
+      const parsedMessages = JSON.parse(savedMessages)
+      console.log('解析后的消息:', parsedMessages)
+      messages.value = parsedMessages
+      console.log('消息已加载到组件中')
     } catch (e) {
       console.error('解析历史消息失败:', e)
+      // 解析失败时清除损坏的数据
+      localStorage.removeItem('aiChatMessages')
     }
+  } else {
+    console.log('localStorage中没有找到历史消息')
   }
 })
 
 // 监听消息变化，保存到本地存储
 function saveMessages() {
-  localStorage.setItem('aiChatMessages', JSON.stringify(messages.value))
+  try {
+    // 过滤掉内容为空的AI消息（可能还在流式生成中）
+    const filteredMessages = messages.value.filter(msg => {
+      // 保留所有用户消息和有内容的AI消息
+      return msg.role === 'user' || (msg.role === 'ai' && msg.content && msg.content.trim() !== '');
+    });
+    
+    const messagesToSave = JSON.stringify(filteredMessages);
+    localStorage.setItem('aiChatMessages', messagesToSave);
+    console.log('消息已保存到localStorage，保存的消息数量:', filteredMessages.length, '原始数量:', messages.value.length);
+  } catch (e) {
+    console.error('保存消息到localStorage失败:', e);
+  }
 }
 
 // 使用watch监听messages变化

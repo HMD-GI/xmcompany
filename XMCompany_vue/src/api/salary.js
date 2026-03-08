@@ -8,6 +8,10 @@ export function getSalaryConfig(employeeId) {
   return request.get(`/xm/salary/config/${employeeId}`)
 }
 
+export function updateSalaryStatus(id, status) {
+  return request.put(`/xm/salary/config/status/${id}?status=${status}`)
+}
+
 export function generatePayroll(data) {
   return request.post('/xm/salary/payroll/generate', data)
 }
@@ -28,10 +32,14 @@ export function getPayrollDetail(payrollId) {
   return request.get(`/xm/salary/payroll/${payrollId}`)
 }
 
-export function getEmployeePayrollList(employeeId, params) {
-  return request.get(`/xm/salary/payroll/list/employee/${employeeId}`, { params })
+export function getSalaryConfigList(params) {
+  return request.get('/xm/salary/config/list', { params })
 }
 
-export function getMonthlyPayrollList(month, params) {
-  return request.get(`/xm/salary/payroll/list/month/${month}`, { params })
-} 
+export function getEmployeePayrollList(params) {
+  return request.get('/xm/salary/payroll/list/employee', { params })
+}
+
+export function getMonthlyPayrollList(params) {
+  return request.get('/xm/salary/payroll/list/month', { params })
+}

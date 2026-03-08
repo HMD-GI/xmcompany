@@ -14,7 +14,8 @@ import static dev.langchain4j.service.spring.AiServiceWiringMode.EXPLICIT;
 @AiService(wiringMode=EXPLICIT,
         streamingChatModel = "qwenStreamingChatModel",
         chatMemoryProvider = "chatMemoryProvider",
-        tools = "xmAiTools"
+        tools = "xmAiTools",
+        contentRetriever = "contentRetrieverPincone"
 )
 public interface Assistant {
 

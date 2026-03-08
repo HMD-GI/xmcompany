@@ -55,4 +55,11 @@ public interface SaleOrderService extends IService<SaleOrder> {
      * @return Result<page<SaleOrderVO>>
      */
     Result<page<SimpleSaleOrderVO>> getSaleOrderList(int currentPage, int pageSize, SaleOrderQueryDTO queryDTO);
+    
+    /**
+     * 删除销售订单
+     * @param id 订单 ID
+     * @return Result
+     */
+    Result deleteSaleOrder(int id);
 }

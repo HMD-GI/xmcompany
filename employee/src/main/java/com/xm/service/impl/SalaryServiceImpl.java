@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xm.dto.PayrollAdjustmentDTO;
 import com.xm.dto.PayrollGenerationDTO;
+import com.xm.dto.PayrollQueryDTO;
 import com.xm.dto.SalaryDTO;
+import com.xm.dto.SalaryQueryDTO;
 import com.xm.entity.Employee;
 import com.xm.entity.Payroll;
 import com.xm.entity.Salary;
@@ -18,6 +20,7 @@ import com.xm.service.SalaryService;
 import com.xm.utils.RedisIdGenerator;
 import com.xm.vo.PayrollVO;
 import com.xm.vo.SalaryVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
  * 薪资服务实现类
  */
 @Service
+@Slf4j
 public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> implements SalaryService {
 
     @Autowired
@@ -79,7 +83,7 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
      * @return 设置结果
      */
     @Override
-    @Transactional//“先读后写” 场景
+    @Transactional//"先读后写" 场景
     public Result setSalary(SalaryDTO salaryDTO) {
         // 验证员工是否存在
         Employee employee = employeeMapper.selectById(salaryDTO.getEmployeeId());
@@ -109,11 +113,8 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
             // 设置员工姓名
             salary.setEmployeeName(employee.getName());
             
-            // 设置状态为有效
-            salary.setStatus(1);
-            
-            // 设置生效日期
-            salary.setEffectiveDate(now);
+            // 设置状态为无效（默认）
+            salary.setStatus(0);
             
             // 设置创建时间和更新时间
             salary.setCreateTime(now);
@@ -147,18 +148,84 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
     public Result<SalaryVO> getSalaryByEmployeeId(int employeeId) {
         // 查询员工薪资配置
         LambdaQueryWrapper<Salary> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Salary::getEmployeeId, employeeId)
-                   .eq(Salary::getStatus, 1);
+        queryWrapper.eq(Salary::getEmployeeId, employeeId);
+//                   .eq(Salary::getStatus, 1);
         Salary salary = salaryMapper.selectOne(queryWrapper);
         
         if (salary == null) {
             return Result.error("员工薪资配置不存在");
         }
         
-        // 转换为VO
-        SalaryVO salaryVO = convertToSalaryVO(salary);
+        // 转换为 VO（不隐藏银行卡号）
+        SalaryVO salaryVO = convertToSalaryVOWithoutMasking(salary);
         
         return Result.success(salaryVO);
+    }
+    
+    /**
+     * 分页查询薪资配置列表
+     * @param currentPage 当前页码
+     * @param pageSize 每页记录数
+     * @param queryDTO 查询条件
+     * @return 薪资配置分页列表
+     */
+    @Override
+    public Result<page<SalaryVO>> getSalaryConfigList(int currentPage, int pageSize, SalaryQueryDTO queryDTO) {
+        // 创建分页对象
+        Page<Salary> pageInfo = new Page<>(currentPage, pageSize);
+        
+        // 执行分页查询
+        Page<Salary> salaryPage = salaryMapper.selectSalaryPage(pageInfo, queryDTO);
+        log.info("分页查询结果：{}", salaryPage);
+        
+        // 转换Salary为SalaryVO
+        List<SalaryVO> salaryVOList = salaryPage.getRecords().stream()
+                .map(this::convertToSalaryVO)
+                .collect(Collectors.toList());
+        
+        // 创建自定义分页对象
+        page<SalaryVO> result = new page<>();
+        result.setPageSize(pageSize);
+        result.setTotal((int) salaryPage.getTotal());
+        result.setList(salaryVOList);
+        
+        return Result.success(result);
+    }
+    
+    /**
+     * 更新员工薪资配置状态
+     * @param id 薪资配置ID
+     * @param status 状态（1:有效, 0:无效）
+     * @return Result
+     */
+    @Override
+    @Transactional
+    public Result updateSalaryStatus(int id, int status) {
+        // 查询薪资配置
+        Salary salary = salaryMapper.selectById(id);
+        if (salary == null) {
+            return Result.error("薪资配置不存在");
+        }
+        
+        // 更新状态
+        salary.setStatus(status);
+        salary.setUpdateTime(LocalDateTime.now());
+        
+        // 根据状态更新生效日期
+        if (status == 1) {
+            // 当状态为有效时，设置生效日期为当前时间
+            salary.setEffectiveDate(LocalDateTime.now());
+        } else {
+            // 当状态为无效时，将生效日期设置为空
+            salary.setEffectiveDate(null);
+        }
+        
+        // 保存更新
+        if (salaryMapper.updateById(salary) > 0) {
+            return Result.success("薪资配置状态更新成功");
+        }
+        
+        return Result.error("薪资配置状态更新失败");
     }
     
     /**
@@ -288,6 +355,22 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
             // 使用Redis生成ID
             int payrollId = redisIdGenerator.generateId("payroll");
             payroll.setId(payrollId);
+            
+            // 检查是否已存在相同ID的记录，避免主键冲突
+            existingPayroll = payrollMapper.selectById(payrollId);
+            int attempts = 0;
+            while (existingPayroll != null && attempts < 3) {
+                // 如果ID已存在，则重新生成一个新的ID
+                payrollId = redisIdGenerator.generateId("payroll");
+                payroll.setId(payrollId);
+                existingPayroll = payrollMapper.selectById(payrollId);
+                attempts++;
+            }
+            
+            // 如果尝试3次后仍然冲突，则返回错误信息
+            if (existingPayroll != null) {
+                return Result.error("ID存在冲突，请稍后重试");
+            }
             
             // 保存工资单
             if (payrollMapper.insert(payroll) > 0) {
@@ -461,104 +544,99 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
         return Result.success(payroll);
     }
     
+    /**
+     * 分页查询员工工资单列表（动态查询）
+     * @param currentPage 当前页码
+     * @param pageSize 每页记录数
+     * @param queryDTO 查询条件
+     * @return 工资单分页列表
+     */
     @Override
-    public Result<page<PayrollVO>> getPayrollList(int employeeId, Integer year, Integer month, int currentPage, int pageSize) {
-        // 查询员工工资单
-        LambdaQueryWrapper<Payroll> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Payroll::getEmployeeId, employeeId);
-        
-        // 按年月筛选
-        if (year != null) {
-            String yearStr = String.valueOf(year);
-            queryWrapper.likeRight(Payroll::getPayrollMonth, yearStr);
-        }
-        
-        if (month != null) {
-            String monthStr = String.format("%02d", month);
-            queryWrapper.likeRight(Payroll::getPayrollMonth, "-" + monthStr);
-        }
-        
-        // 按发放时间降序排序
-        queryWrapper.orderByDesc(Payroll::getPayrollMonth);
+    public Result<page<PayrollVO>> getEmployeePayrollList(int currentPage, int pageSize, PayrollQueryDTO queryDTO) {
+        // 创建分页对象
+        Page<Payroll> pageInfo = new Page<>(currentPage, pageSize);
         
         // 执行分页查询
-        Page<Payroll> pageInfo = new Page<>(currentPage, pageSize);
-        Page<Payroll> payrollPage = payrollMapper.selectPage(pageInfo, queryWrapper);
-        
-        // 转换为VO列表
-        List<PayrollVO> payrollVOList = payrollPage.getRecords().stream()
-                .map(this::convertToPayrollVO)
-                .collect(Collectors.toList());
+        Page<PayrollVO> payrollPage = payrollMapper.selectEmployeePayrollPage(pageInfo, queryDTO);
         
         // 创建自定义分页对象
         page<PayrollVO> result = new page<>();
         result.setPageSize(pageSize);
         result.setTotal((int) payrollPage.getTotal());
-        result.setList(payrollVOList);
-        
-        return Result.success(result);
-    }
-    
-    @Override
-    public Result<page<PayrollVO>> getPayrollListByMonth(String month, Integer status, int currentPage, int pageSize) {
-        // 验证月份格式
-        if (!month.matches("\\d{4}-\\d{2}")) {
-            return Result.error("月份格式不正确，应为yyyy-MM");
-        }
-        
-        // 查询月度工资单
-        LambdaQueryWrapper<Payroll> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Payroll::getPayrollMonth, month);
-        
-        // 按状态筛选
-        if (status != null) {
-            queryWrapper.eq(Payroll::getStatus, status);
-        }
-        
-        // 按员工ID排序
-        queryWrapper.orderByAsc(Payroll::getEmployeeId);
-        
-        // 执行分页查询
-        Page<Payroll> pageInfo = new Page<>(currentPage, pageSize);
-        Page<Payroll> payrollPage = payrollMapper.selectPage(pageInfo, queryWrapper);
-        
-        // 转换为VO列表
-        List<PayrollVO> payrollVOList = payrollPage.getRecords().stream()
-                .map(this::convertToPayrollVO)
-                .collect(Collectors.toList());
-        
-        // 创建自定义分页对象
-        page<PayrollVO> result = new page<>();
-        result.setPageSize(pageSize);
-        result.setTotal((int) payrollPage.getTotal());
-        result.setList(payrollVOList);
+        result.setList(payrollPage.getRecords());
         
         return Result.success(result);
     }
     
     /**
-     * 将薪资配置实体转换为VO
+     * 分页查询月度工资单列表（动态查询）
+     * @param currentPage 当前页码
+     * @param pageSize 每页记录数
+     * @param queryDTO 查询条件
+     * @return 工资单分页列表
+     */
+    @Override
+    public Result<page<PayrollVO>> getMonthlyPayrollList(int currentPage, int pageSize, PayrollQueryDTO queryDTO) {
+        // 创建分页对象
+        Page<Payroll> pageInfo = new Page<>(currentPage, pageSize);
+        
+        // 执行分页查询
+        Page<PayrollVO> payrollPage = payrollMapper.selectMonthlyPayrollPage(pageInfo, queryDTO);
+        
+        // 创建自定义分页对象
+        page<PayrollVO> result = new page<>();
+        result.setPageSize(pageSize);
+        result.setTotal((int) payrollPage.getTotal());
+        result.setList(payrollPage.getRecords());
+        
+        return Result.success(result);
+    }
+    
+    /**
+     * 将薪资配置实体转换为 VO（隐藏部分银行卡号）
      */
     private SalaryVO convertToSalaryVO(Salary salary) {
         SalaryVO salaryVO = new SalaryVO();
         BeanUtils.copyProperties(salary, salaryVO);
-        
+            
         // 隐藏部分银行卡号
         if (salary.getBankCardNo() != null && salary.getBankCardNo().length() > 8) {
             String cardNo = salary.getBankCardNo();
             String maskedCardNo = cardNo.substring(0, 4) + "****" + cardNo.substring(cardNo.length() - 4);
             salaryVO.setBankCardNo(maskedCardNo);
         }
-        
+            
         // 计算薪资基数合计
         BigDecimal totalBase = salary.getBasicSalary()
                             .add(salary.getPerformanceBase())
                             .add(salary.getAllowance());
         salaryVO.setTotalBase(totalBase);
-        
+            
         // 设置状态描述
         salaryVO.setStatusDesc(SALARY_STATUS_MAP.getOrDefault(salary.getStatus(), "未知"));
+            
+        return salaryVO;
+    }
         
+    /**
+     * 将薪资配置实体转换为 VO（不隐藏银行卡号）
+     */
+    private SalaryVO convertToSalaryVOWithoutMasking(Salary salary) {
+        SalaryVO salaryVO = new SalaryVO();
+        BeanUtils.copyProperties(salary, salaryVO);
+            
+        // 不隐藏银行卡号，直接返回完整卡号
+        // 保持原始银行卡号不变
+            
+        // 计算薪资基数合计
+        BigDecimal totalBase = salary.getBasicSalary()
+                            .add(salary.getPerformanceBase())
+                            .add(salary.getAllowance());
+        salaryVO.setTotalBase(totalBase);
+            
+        // 设置状态描述
+        salaryVO.setStatusDesc(SALARY_STATUS_MAP.getOrDefault(salary.getStatus(), "未知"));
+            
         return salaryVO;
     }
     
@@ -622,4 +700,4 @@ public class SalaryServiceImpl extends ServiceImpl<SalaryMapper, Salary> impleme
         
         return tax.setScale(2, RoundingMode.HALF_UP);
     }
-} 
+}

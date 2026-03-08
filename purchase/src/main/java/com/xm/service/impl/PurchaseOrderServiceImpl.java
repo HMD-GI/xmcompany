@@ -77,6 +77,10 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
             if (request.getStatus() != 2) {
                 return Result.error("只能关联已通过的采购申请");
             }
+            // 检查采购申请的物料名是否与采购订单的物料名一致
+            if (!order.getItemName().equals(request.getItemName())) {
+                return Result.error("采购申请物料名与采购订单物料名不一致");
+            }
         }else{
             return Result.error("需要关联采购申请");
         }
@@ -241,7 +245,14 @@ public class PurchaseOrderServiceImpl extends ServiceImpl<PurchaseOrderMapper, P
         order.setStatus(statusDTO.getStatus());
         order.setUpdateTime(LocalDateTime.now());
         this.updateById(order);
-        
+
+        // 7. 订单状态修改为4时（已完成），修改采购申请状态为已完成
+        if (statusDTO.getStatus() == 4) {
+            PurchaseRequest request = purchaseRequestService.getById(order.getPurchaseRequestId());
+            request.setStatus(5);
+            request.setUpdateTime(LocalDateTime.now());
+            purchaseRequestService.updateById(request);
+        }
         return Result.success("变更采购订单状态成功");
     }
 

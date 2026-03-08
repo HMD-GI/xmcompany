@@ -1,6 +1,7 @@
 package com.xm.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xm.dto.ProductionProgressQueryDTO;
 import com.xm.dto.ProductionProgressUpdateDTO;
 import com.xm.entity.ProductionProgress;
 import com.xm.page.page;
@@ -30,10 +31,10 @@ public interface ProductionProgressService extends IService<ProductionProgress> 
      * 分页查询项目进度记录
      * @param currentPage 当前页码
      * @param pageSize 每页记录数
-     * @param projectId 项目ID
+     * @param queryDTO 查询条件
      * @return Result<page<ProductionProgressVO>>
      */
-    Result<page<ProgressVO>> getProgressList(int currentPage, int pageSize, int projectId);
+    Result<page<ProductionProgressVO>> getProgressList(int currentPage, int pageSize, ProductionProgressQueryDTO queryDTO);
     
     /**
      * 添加进度记录

@@ -17,7 +17,11 @@
     </el-form>
 
     <el-table :data="list" v-loading="loading" stripe>
-      <el-table-column prop="id" label="产品ID" width="100" />
+      <el-table-column label="序号" width="80" align="center">
+        <template #default="{ $index }">
+          {{ $index + 1 }}
+        </template>
+      </el-table-column>
       <el-table-column prop="productName" label="产品名称" />
       <el-table-column prop="category" label="产品类别" />
       <el-table-column prop="specification" label="规格" />

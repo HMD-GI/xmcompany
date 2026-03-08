@@ -3,6 +3,7 @@ package com.xm.service.impl;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xm.dto.ProductionProgressQueryDTO;
 import com.xm.dto.ProductionProgressUpdateDTO;
 import com.xm.dto.StockInDTO;
 import com.xm.entity.ProductionProgress;
@@ -157,42 +158,30 @@ public class ProductionProgressServiceImpl extends ServiceImpl<ProductionProgres
      * 分页查询项目进度记录
      * @param currentPage 当前页码
      * @param pageSize 每页记录数
-     * @param projectId 项目ID
+     * @param queryDTO 查询条件
      * @return Result<page<ProgressVO>>
      */
-    //TODO 分页动态查询项目进度记录
     @Override
-    public Result<page<ProgressVO>> getProgressList(int currentPage, int pageSize, int projectId) {
-        log.info("分页查询项目进度记录: 页码={}, 每页数量={}, 项目ID={}", currentPage, pageSize, projectId);
-        
-        // 检查项目是否存在
-        ProductionProject project = productionProjectService.getById(projectId);
-        if (project == null) {
-            return Result.error("生产项目不存在");
-        }
+    public Result<page<ProductionProgressVO>> getProgressList(int currentPage, int pageSize, ProductionProgressQueryDTO queryDTO) {
+        log.info("分页查询项目进度记录: 页码={}, 每页数量={}, 查询条件={}", currentPage, pageSize, queryDTO);
         
         // 创建分页参数
         Page<ProductionProgress> pageParam = new Page<>(currentPage, pageSize);
         
         // 执行查询
-        IPage<ProductionProgressVO> progressPage = this.baseMapper.selectProgressPage(pageParam, projectId);
+        Page<ProductionProgressVO> progressPage = this.baseMapper.selectProgressPage(pageParam, queryDTO);
+
         
         // 使用stream转换记录
-        List<ProgressVO> voList = progressPage.getRecords().stream()
-            .map(pp -> {
-                ProgressVO vo = new ProgressVO();
-                // 假设存在字段映射方法
-                BeanUtils.copyProperties(vo, pp);
-                return vo;
-            })
-            .collect(Collectors.toList());
+        List<ProductionProgressVO> voList = progressPage.getRecords();
+
         
         // 封装结果
-        page<ProgressVO> resultPage = new page<>();
+        page<ProductionProgressVO> resultPage = new page<>();
         resultPage.setPageSize(pageSize);
         resultPage.setTotal((int) progressPage.getTotal());
         resultPage.setList(voList);
-        
+
         return Result.success(resultPage);
     }
 

@@ -25,7 +25,19 @@
     <!-- 分页查询项目进度记录 -->
     <select id="selectProgressPage" resultType="com.xm.vo.ProductionProgressVO">
         <include refid="baseProgressQuery"/>
-        WHERE pp.project_id = #{projectId}
+        <where>
+            <if test="query != null">
+                <if test="query.projectId != null">
+                    AND pp.project_id = #{query.projectId}
+                </if>
+                <if test="query.projectName != null and query.projectName != ''">
+                    AND p.project_name LIKE CONCAT('%', #{query.projectName}, '%')
+                </if>
+                <if test="query.operatorName != null and query.operatorName != ''">
+                    AND pp.operator_name LIKE CONCAT('%', #{query.operatorName}, '%')
+                </if>
+            </if>
+        </where>
         ORDER BY pp.operation_time DESC
     </select>
     

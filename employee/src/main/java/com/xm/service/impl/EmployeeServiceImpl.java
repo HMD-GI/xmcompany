@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xm.dto.ChangePasswordDTO;
+import com.xm.dto.EmployeeQueryDTO;
 import com.xm.entity.Employee;
 import com.xm.entity.employeeLogin;
 import com.xm.exception.PasswordChangeException;
@@ -179,24 +180,16 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
      * @param pageSize 每页显示数量
      * @return 员工分页列表
      */
-    //TODO 动态条件查询员工列表
     @Override
-    public Result<page<EmployeeVO>> getEmployeeList(int currentPage, int pageSize) {
-        // 创建MyBatis-Plus的分页对象，用于查询Employee实体
+    public Result<page<EmployeeVO>> getEmployeeList(int currentPage, int pageSize, EmployeeQueryDTO queryDTO) {
+        // 创建分页对象
         Page<Employee> pageInfo = new Page<>(currentPage, pageSize);
         
-        // 创建查询条件
-        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
-        
         // 执行分页查询
-        Page<Employee> employeePage = employeeMapper.selectPage(pageInfo, queryWrapper);
+        Page<EmployeeVO> employeePage = employeeMapper.selectEmployeePage(pageInfo, queryDTO);
         
         // 将Employee列表转换为EmployeeVO列表
-        List<EmployeeVO> voList = employeePage.getRecords().stream().map(employee -> {
-            EmployeeVO vo = new EmployeeVO();
-            BeanUtils.copyProperties(employee, vo);
-            return vo;
-        }).collect(Collectors.toList());
+        List<EmployeeVO> voList = employeePage.getRecords();
         
         // 创建自定义分页对象
         page<EmployeeVO> result = new page<>();

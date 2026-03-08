@@ -1,0 +1,236 @@
+{
+  // 薪资管理模块接口测试数据
+  "testData": {
+    // 测试数据描述
+    "description": "薪资管理接口测试数据",
+    
+    // 薪资配置相关接口测试数据
+    "salaryConfig": {
+      // 设置员工薪资配置接口测试数据
+      "setSalary": {
+        "url": "/xm/salary/config",
+        "method": "POST",
+        "description": "设置员工薪资配置",
+        // 请求体参数，对应SalaryDTO类
+        "requestBody": {
+          "employeeId": 1001,              // 员工ID
+          "bankCardNo": "6225887744556688", // 银行卡号
+          "bankName": "中国工商银行",          // 开户银行
+          "basicSalary": 9000.00,          // 基本工资
+          "performanceBase": 3500.00,      // 绩效基数
+          "allowance": 800.00,             // 固定补贴
+          "insuranceAmount": 1200.00,      // 五险一金金额
+          "remark": "高级工程师薪资配置"      // 备注
+        },
+        // 预期响应结果
+        "expectedResponse": {
+          "code": 200,
+          "message": "薪资配置设置成功"
+        }
+      },
+      
+      // 获取员工薪资配置接口测试数据
+      "getSalaryConfig": {
+        "url": "/xm/salary/config/1001",
+        "method": "GET",
+        "description": "获取员工薪资配置",
+        // 预期响应结果，对应SalaryVO类
+        "expectedResponse": {
+          "code": 200,
+          "data": {
+            "employeeId": 1001,              // 员工ID
+            "employeeName": "王五",            // 员工姓名
+            "bankCardNo": "6225****6688",    // 银行卡号（部分隐藏）
+            "bankName": "中国工商银行",          // 开户银行
+            "basicSalary": 9000.00,          // 基本工资
+            "performanceBase": 3500.00,      // 绩效基数
+            "allowance": 800.00,             // 固定补贴
+            "insuranceAmount": 1200.00,      // 五险一金金额
+            "totalBase": 13300.00,           // 薪资基数合计（基本工资+绩效基数+固定补贴）
+            "statusDesc": "有效"              // 状态描述
+          }
+        }
+      }
+    },
+    
+    // 工资单相关接口测试数据
+    "payroll": {
+      // 生成月度工资单接口测试数据
+      "generatePayroll": {
+        "url": "/xm/salary/payroll/generate",
+        "method": "POST",
+        "description": "生成月度工资单",
+        // 请求体参数，对应PayrollGenerationDTO类
+        "requestBody": {
+          "month": "2023-11"  // 薪资月份（格式：yyyy-MM）
+          // employeeId未指定，表示生成所有员工的工资单
+        },
+        // 预期响应结果
+        "expectedResponse": {
+          "code": 200,
+          "message": "成功生成10条工资单，跳过2条"
+        }
+      },
+      
+      // 为指定员工生成工资单接口测试数据
+      "generatePayrollForSpecificEmployee": {
+        "url": "/xm/salary/payroll/generate",
+        "method": "POST",
+        "description": "为指定员工生成工资单",
+        // 请求体参数，对应PayrollGenerationDTO类
+        "requestBody": {
+          "month": "2023-11",    // 薪资月份（格式：yyyy-MM）
+          "employeeId": 1001     // 员工ID，指定为特定员工生成工资单
+        },
+        // 预期响应结果
+        "expectedResponse": {
+          "code": 200,
+          "message": "成功生成1条工资单，跳过0条"
+        }
+      },
+      
+      // 调整工资单接口测试数据
+      "adjustPayroll": {
+        "url": "/xm/salary/payroll/adjust",
+        "method": "PUT",
+        "description": "调整工资单",
+        // 请求体参数，对应PayrollAdjustmentDTO类
+        "requestBody": {
+          "payrollId": 10001,       // 薪资单ID
+          "performance": 4000.00,   // 绩效工资调整
+          "overtime": 600.00,       // 加班费调整
+          "bonus": 1200.00,         // 奖金调整
+          "deduction": 100.00,      // 扣款调整
+          "remark": "月度绩效考核优秀，发放绩效奖金"  // 调整说明
+        },
+        // 预期响应结果
+        "expectedResponse": {
+          "code": 200,
+          "message": "工资单调整成功"
+        }
+      },
+      
+      // 发放单个工资单接口测试数据
+      "payPayroll": {
+        "url": "/xm/salary/payroll/pay/10001",
+        "method": "PUT",
+        "description": "发放单个工资单",
+        // 路径参数：payrollId=10001
+        // 预期响应结果
+        "expectedResponse": {
+          "code": 200,
+          "message": "工资发放成功"
+        }
+      },
+      
+      // 批量发放月度工资单接口测试数据
+      "payAllByMonth": {
+        "url": "/xm/salary/payroll/payall/2023-11",
+        "method": "PUT",
+        "description": "批量发放月度工资单",
+        // 路径参数：month=2023-11
+        // 预期响应结果
+        "expectedResponse": {
+          "code": 200,
+          "message": "批量发放成功，共发放 8 笔工资"
+        }
+      },
+      
+      // 获取工资单详情接口测试数据
+      "getPayrollDetail": {
+        "url": "/xm/salary/payroll/10001",
+        "method": "GET",
+        "description": "获取工资单详情",
+        // 路径参数：payrollId=10001
+        // 预期响应结果，对应Payroll实体类
+        "expectedResponse": {
+          "code": 200,
+          "data": {
+            "id": 10001,                  // 薪资单ID
+            "employeeId": 1001,           // 员工ID
+            "employeeName": "王五",         // 员工姓名
+            "bankCardNo": "6225****6688", // 银行卡号（部分隐藏）
+            "bankName": "中国工商银行",       // 开户银行
+            "payrollMonth": "2023-11",    // 薪资月份
+            "basicSalary": 9000.00,       // 基本工资
+            "performance": 4000.00,       // 绩效工资
+            "allowance": 800.00,          // 补贴
+            "overtime": 600.00,           // 加班费
+            "bonus": 1200.00,             // 奖金
+            "deduction": 100.00,          // 扣款
+            "insuranceAmount": 1200.00,   // 五险一金
+            "taxableAmount": 12900.00,    // 应纳税额
+            "tax": 1200.00,               // 个人所得税
+            "actualAmount": 11700.00,     // 实发金额
+            "status": 1                   // 状态（0:待发放, 1:已发放, 2:已撤销）
+          }
+        }
+      },
+      
+      // 查询员工工资单列表接口测试数据
+      "getEmployeePayrollList": {
+        "url": "/xm/salary/payroll/list/employee/1001",
+        "method": "GET",
+        "description": "查询员工工资单列表",
+        // 路径参数：employeeId=1001
+        // 查询参数
+        "queryParams": {
+          "year": 2023,      // 年份筛选条件
+          "month": 11,       // 月份筛选条件
+          "currentPage": 1,  // 当前页码
+          "pageSize": 10     // 每页记录数
+        },
+        // 预期响应结果，对应PayrollVO分页数据
+        "expectedResponse": {
+          "code": 200,
+          "data": {
+            "pageSize": 10,
+            "total": 1,
+            "list": [
+              {
+                "id": 10001,                  // 薪资单ID
+                "employeeName": "王五",         // 员工姓名
+                "payrollMonth": "2023-11",    // 薪资月份
+                "bankCardNo": "6225****6688", // 银行卡号（部分隐藏）
+                "actualAmount": 11700.00,     // 实发金额
+                "status": 1                   // 状态
+              }
+            ]
+          }
+        }
+      },
+      
+      // 查询月度工资单列表接口测试数据
+      "getMonthlyPayrollList": {
+        "url": "/xm/salary/payroll/list/month/2023-11",
+        "method": "GET",
+        "description": "查询月度工资单列表",
+        // 路径参数：month=2023-11
+        // 查询参数
+        "queryParams": {
+          "status": 1,       // 状态筛选条件
+          "currentPage": 1,  // 当前页码
+          "pageSize": 20     // 每页记录数
+        },
+        // 预期响应结果，对应PayrollVO分页数据
+        "expectedResponse": {
+          "code": 200,
+          "data": {
+            "pageSize": 20,
+            "total": 8,
+            "list": [
+              {
+                "id": 10001,                  // 薪资单ID
+                "employeeName": "王五",         // 员工姓名
+                "payrollMonth": "2023-11",    // 薪资月份
+                "bankCardNo": "6225****6688", // 银行卡号（部分隐藏）
+                "actualAmount": 11700.00,     // 实发金额
+                "status": 1                   // 状态
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

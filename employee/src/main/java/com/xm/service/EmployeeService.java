@@ -2,6 +2,7 @@ package com.xm.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.dto.ChangePasswordDTO;
+import com.xm.dto.EmployeeQueryDTO;
 import com.xm.entity.Employee;
 import com.xm.result.Result;
 import com.xm.page.page;
@@ -43,7 +44,7 @@ public interface EmployeeService extends IService<Employee> {
      * @param pageSize 每页显示数量
      * @return Result<page<Employee>> 分页结果
      */
-    Result<page<EmployeeVO>> getEmployeeList(int currentPage, int pageSize);
+    Result<page<EmployeeVO>> getEmployeeList(int currentPage, int pageSize, EmployeeQueryDTO queryDTO);
 
     /**
      * 重置员工密码

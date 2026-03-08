@@ -1,5 +1,6 @@
 package com.xm.controller;
 
+import com.xm.dto.ProductionProgressQueryDTO;
 import com.xm.dto.ProductionProgressUpdateDTO;
 import com.xm.page.page;
 import com.xm.result.Result;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 生产进度控制器
  */
-//TODO 生产进度控制器未生成前端页面
+
 @Tag(name = "生产进度管理", description = "生产进度的查询与操作相关接口")
 @Slf4j
 @RestController
@@ -53,16 +54,16 @@ public class ProductionProgressController {
      * 分页查询项目进度记录
      * @param currentPage 当前页码，默认为1
      * @param pageSize 每页显示数量，默认为10
-     * @param projectId 项目ID
+     * @param queryDTO 查询条件
      * @return Result<page<ProductionProgressVO>>
      */
-    @Operation(summary = "分页查询进度记录", description = "根据项目ID分页查询生产进度记录列表")
-    @GetMapping("/list/{projectId}")
-    public Result<page<ProgressVO>> getProgressList(
+    @Operation(summary = "分页查询进度记录", description = "根据条件分页查询生产进度记录列表")
+    @GetMapping("/list")
+    public Result<page<ProductionProgressVO>> getProgressList(
             @RequestParam(defaultValue = "1") int currentPage,
             @RequestParam(defaultValue = "10") int pageSize,
-            @PathVariable int projectId) {
-        log.info("分页查询项目进度记录: 页码={}, 每页数量={}, 项目ID={}", currentPage, pageSize, projectId);
-        return productionProgressService.getProgressList(currentPage, pageSize, projectId);
+            ProductionProgressQueryDTO queryDTO) {
+        log.info("分页查询项目进度记录: 页码={}, 每页数量={}, 查询条件={}", currentPage, pageSize, queryDTO);
+        return productionProgressService.getProgressList(currentPage, pageSize, queryDTO);
     }
 }
