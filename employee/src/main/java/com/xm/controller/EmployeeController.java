@@ -109,7 +109,7 @@ public class EmployeeController {
      * @param id 员工ID
      * @return Result
      */
-    @Operation(summary = "重置员工密码", description = "将指定员工的密码重置为默认密码xm123456")
+    @Operation(summary = "重置员工密码", description = "将指定员工的密码重置为系统默认密码")
     @PutMapping("/reset-password/{id}")
     public Result resetPassword(@PathVariable int id) {
         return employeeService.resetPassword(id);

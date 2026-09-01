@@ -3,7 +3,7 @@
     <div class="login-background">
       <div class="login-left">
         <div class="company-info">
-          <h1 class="company-name">XMCompany</h1>
+          <h1 class="company-name">基于Spring Boot的公司管理系统设计与实现</h1>
           <p class="company-slogan">企业管理系统</p>
           <div class="company-features">
             <div class="feature-item">

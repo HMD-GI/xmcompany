@@ -215,7 +215,7 @@ public class EmployeeServiceImpl extends ServiceImpl<EmployeeMapper, Employee> i
         }
 
         // 设置新密码
-        String newPassword = "xm123456";
+        String newPassword = "default@123"; // 默认密码，生产环境请从配置读取
         employee.setPassword(newPassword);
 
         // 更新员工表密码

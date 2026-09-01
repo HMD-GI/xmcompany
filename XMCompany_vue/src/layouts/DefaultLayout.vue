@@ -2,7 +2,7 @@
   <el-container class="app-container">
     <el-header class="app-header">
       <div class="logo">
-        <span class="logo-text">XMCompany</span>
+        <span class="logo-text">基于Spring Boot的公司管理系统设计与实现</span>
       </div>
       <div class="header-right">
         <el-dropdown>
@@ -75,10 +75,10 @@
             <el-icon><i class="el-icon-money"></i></el-icon>
             <span>薪资管理</span>
           </el-menu-item>
-          <el-menu-item index="/ai">
+          <!-- <el-menu-item index="/ai">
             <el-icon><i class="el-icon-chat-dot-round"></i></el-icon>
             <span>AI助手</span>
-          </el-menu-item>
+          </el-menu-item> -->
         </el-menu>
       </el-aside>
       <el-main class="app-main">

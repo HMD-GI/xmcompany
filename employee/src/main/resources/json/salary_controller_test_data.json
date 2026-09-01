@@ -14,7 +14,7 @@
         // 请求体参数，对应SalaryDTO类
         "requestBody": {
           "employeeId": 1001,              // 员工ID
-          "bankCardNo": "6225887744556688", // 银行卡号
+          "bankCardNo": "6225********6688", // 银行卡号
           "bankName": "中国工商银行",          // 开户银行
           "basicSalary": 9000.00,          // 基本工资
           "performanceBase": 3500.00,      // 绩效基数
@@ -39,7 +39,7 @@
           "code": 200,
           "data": {
             "employeeId": 1001,              // 员工ID
-            "employeeName": "王五",            // 员工姓名
+            "employeeName": "员工C",            // 员工姓名
             "bankCardNo": "6225****6688",    // 银行卡号（部分隐藏）
             "bankName": "中国工商银行",          // 开户银行
             "basicSalary": 9000.00,          // 基本工资
@@ -148,7 +148,7 @@
           "data": {
             "id": 10001,                  // 薪资单ID
             "employeeId": 1001,           // 员工ID
-            "employeeName": "王五",         // 员工姓名
+            "employeeName": "员工C",         // 员工姓名
             "bankCardNo": "6225****6688", // 银行卡号（部分隐藏）
             "bankName": "中国工商银行",       // 开户银行
             "payrollMonth": "2023-11",    // 薪资月份
@@ -189,7 +189,7 @@
             "list": [
               {
                 "id": 10001,                  // 薪资单ID
-                "employeeName": "王五",         // 员工姓名
+                "employeeName": "员工C",         // 员工姓名
                 "payrollMonth": "2023-11",    // 薪资月份
                 "bankCardNo": "6225****6688", // 银行卡号（部分隐藏）
                 "actualAmount": 11700.00,     // 实发金额
@@ -221,7 +221,7 @@
             "list": [
               {
                 "id": 10001,                  // 薪资单ID
-                "employeeName": "王五",         // 员工姓名
+                "employeeName": "员工C",         // 员工姓名
                 "payrollMonth": "2023-11",    // 薪资月份
                 "bankCardNo": "6225****6688", // 银行卡号（部分隐藏）
                 "actualAmount": 11700.00,     // 实发金额

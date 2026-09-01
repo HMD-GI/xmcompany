@@ -5,7 +5,7 @@
     "description": "设置员工薪资配置",
     "requestBody": {
       "employeeId": 1,
-      "bankCardNo": "6225887744556677",
+      "bankCardNo": "6225********6677",
       "bankName": "中国建设银行",
       "basicSalary": 8000.00,
       "performanceBase": 3000.00,
@@ -27,7 +27,7 @@
       "code": 200,
       "data": {
         "employeeId": 1,
-        "employeeName": "张三",
+        "employeeName": "员工A",
         "bankCardNo": "6225****6677",
         "bankName": "中国建设银行",
         "basicSalary": 8000.00,
@@ -79,7 +79,7 @@
       "data": {
         "id": 10001,
         "employeeId": 1,
-        "employeeName": "张三",
+        "employeeName": "员工A",
         "bankCardNo": "6225****6677",
         "bankName": "中国建设银行",
         "payrollMonth": "2023-10",
@@ -133,7 +133,7 @@
           {
             "id": 10001,
             "employeeId": 1,
-            "employeeName": "张三",
+            "employeeName": "员工A",
             "payrollMonth": "2023-10",
             "basicSalary": 8000.00,
             "actualAmount": 11960.00,
@@ -158,7 +158,7 @@
           {
             "id": 10001,
             "employeeId": 1,
-            "employeeName": "张三",
+            "employeeName": "员工A",
             "payrollMonth": "2023-10",
             "totalIncome": 14000.00,
             "totalDeduction": 2040.00,

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class JwtUtils {
 
-    private static final String signKey = "xmcompany123456";//签名密钥，增加长度和复杂度
+    private static final String signKey = System.getenv().getOrDefault("JWT_SIGN_KEY", "please-set-jwt-sign-key");//签名密钥，从环境变量读取
     //TODO 将jwt有效时间改为50天
     private static final Long expire = 4320000000L; //有效时间
 

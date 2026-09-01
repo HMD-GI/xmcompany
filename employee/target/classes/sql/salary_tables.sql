@@ -52,8 +52,8 @@ CREATE TABLE IF NOT EXISTS `employee_payroll` (
 -- 示例数据插入（可选）
 INSERT INTO `employee_salary` (`id`, `employee_id`, `employee_name`, `bank_card_no`, `bank_name`, `basic_salary`, `performance_base`, `allowance`, `insurance_amount`, `effective_date`, `status`, `remark`, `create_time`, `update_time`)
 VALUES
-(1001, 1, '张三', '6225887744556677', '中国建设银行', 8000.00, 3000.00, 1000.00, 1500.00, NOW(), 1, '初始薪资配置', NOW(), NOW()),
-(1002, 2, '李四', '6225997755446688', '中国工商银行', 7500.00, 2500.00, 1200.00, 1400.00, NOW(), 1, '初始薪资配置', NOW(), NOW());
+(1001, 1, '员工A', '6225********6677', '中国建设银行', 8000.00, 3000.00, 1000.00, 1500.00, NOW(), 1, '初始薪资配置', NOW(), NOW()),
+(1002, 2, '员工B', '6225********6688', '中国工商银行', 7500.00, 2500.00, 1200.00, 1400.00, NOW(), 1, '初始薪资配置', NOW(), NOW());
 
 -- 添加Redis序列配置
 INSERT INTO `redis_key_config` (`key_name`, `current_value`, `step`, `description`, `create_time`, `update_time`)

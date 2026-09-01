@@ -212,7 +212,7 @@ function resetEditForm() {
     id: undefined,
     name: '',
     username: '',
-    password: 'xm123456',
+    password: 'default@123',
     gender: '男',
     phone: '',
     email: '',
