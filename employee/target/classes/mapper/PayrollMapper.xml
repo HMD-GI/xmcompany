@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.mapper.PayrollMapper">
+    <!-- 基础查询SQL片段 -->
+    <sql id="basePayrollQuery">
+        SELECT
+            p.id,
+            p.employee_id,
+            p.employee_name,
+            p.bank_card_no,
+            p.bank_name,
+            p.payroll_month,
+            p.basic_salary,
+            p.performance,
+            p.allowance,
+            p.overtime,
+            p.bonus,
+            p.deduction,
+            p.insurance_amount,
+            p.taxable_amount,
+            p.tax,
+            p.actual_amount,
+            p.status,
+            p.pay_time,
+            p.create_time,
+            p.update_time
+        FROM employee_payroll p
+        WHERE 1=1
+    </sql>
+
+    <!-- 分页查询员工工资单列表 -->
+    <select id="selectEmployeePayrollPage" resultType="com.xm.vo.PayrollVO">
+        <include refid="basePayrollQuery"/>
+        <if test="query != null">
+            <if test="query.employeeId != null">
+                AND p.employee_id = #{query.employeeId}
+            </if>
+            <if test="query.employeeName != null and query.employeeName != ''">
+                AND p.employee_name LIKE CONCAT('%', #{query.employeeName}, '%')
+            </if>
+            <if test="query.payrollMonth != null and query.payrollMonth != ''">
+                AND p.payroll_month = #{query.payrollMonth}
+            </if>
+            <if test="query.bankCardNo != null and query.bankCardNo != ''">
+                AND p.bank_card_no LIKE CONCAT('%', #{query.bankCardNo}, '%')
+            </if>
+            <if test="query.minAmount != null">
+                AND p.actual_amount >= #{query.minAmount}
+            </if>
+            <if test="query.maxAmount != null">
+                AND p.actual_amount &lt;= #{query.maxAmount}
+            </if>
+            <if test="query.status != null">
+                AND p.status = #{query.status}
+            </if>
+        </if>
+        ORDER BY p.create_time DESC
+    </select>
+    
+    <!-- 分页查询月度工资单列表 -->
+    <select id="selectMonthlyPayrollPage" resultType="com.xm.vo.PayrollVO">
+        <include refid="basePayrollQuery"/>
+        <if test="query != null">
+            <if test="query.employeeId != null">
+                AND p.employee_id = #{query.employeeId}
+            </if>
+            <if test="query.employeeName != null and query.employeeName != ''">
+                AND p.employee_name LIKE CONCAT('%', #{query.employeeName}, '%')
+            </if>
+            <if test="query.payrollMonth != null and query.payrollMonth != ''">
+                AND p.payroll_month = #{query.payrollMonth}
+            </if>
+            <if test="query.bankCardNo != null and query.bankCardNo != ''">
+                AND p.bank_card_no LIKE CONCAT('%', #{query.bankCardNo}, '%')
+            </if>
+            <if test="query.minAmount != null">
+                AND p.actual_amount >= #{query.minAmount}
+            </if>
+            <if test="query.maxAmount != null">
+                AND p.actual_amount &lt;= #{query.maxAmount}
+            </if>
+            <if test="query.status != null">
+                AND p.status = #{query.status}
+            </if>
+        </if>
+        ORDER BY p.employee_id ASC
+    </select>
+</mapper>

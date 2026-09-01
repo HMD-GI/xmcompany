@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.mapper.SaleOrderMapper">
+    <!-- 基础查询SQL片段 -->
+    <sql id="baseSaleOrderQuery">
+        SELECT 
+            so.id,
+            so.order_no,
+            so.customer_id,
+            so.customer_name,
+            so.product_name,
+            so.quantity,
+            so.unit,
+            so.amount,
+            so.status,
+            CASE so.status
+                WHEN 0 THEN '待处理'
+                WHEN 1 THEN '已确认'
+                WHEN 2 THEN '已发货'
+                WHEN 3 THEN '已完成'
+                WHEN 4 THEN '已取消'
+                ELSE '未知状态'
+            END AS status_name,
+            so.delivery_time,
+            so.shipping_time,
+            so.operator_name,
+            so.remark,
+            so.create_time,
+            so.update_time
+        FROM sale_order so
+        WHERE 1=1
+    </sql>
+    
+    <!-- 分页查询销售订单 -->
+    <select id="selectSaleOrderPage" resultType="com.xm.vo.SaleOrderVO">
+        <include refid="baseSaleOrderQuery"/>
+        <if test="query != null">
+            <if test="query.orderNo != null and query.orderNo != ''">
+                AND so.order_no LIKE CONCAT('%', #{query.orderNo}, '%')
+            </if>
+            <if test="query.customerName != null and query.customerName != ''">
+                AND so.customer_name LIKE CONCAT('%', #{query.customerName}, '%')
+            </if>
+            <if test="query.productName != null and query.productName != ''">
+                AND so.product_name LIKE CONCAT('%', #{query.productName}, '%')
+            </if>
+            <if test="query.status != null">
+                AND so.status = #{query.status}
+            </if>
+        </if>
+        ORDER BY so.create_time DESC
+    </select>
+    
+    <!-- 根据ID查询销售订单详情 -->
+    <select id="selectSaleOrderById" resultType="com.xm.vo.SaleOrderVO">
+        <include refid="baseSaleOrderQuery"/>
+        AND so.id = #{id}
+    </select>
+</mapper>

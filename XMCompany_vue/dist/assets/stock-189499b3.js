@@ -1,0 +1,1 @@
+import{i as o}from"./request-afc982ff.js";function n(t){return o.get(`/xm/stock/${t}`)}function i(t){return o.get("/xm/stock/list",{params:t})}function r(t){return o.get(`/xm/stock-operation/${t}`)}function c(t){return o.get("/xm/stock-operation/list",{params:t})}export{n as a,c as b,r as c,i as g};

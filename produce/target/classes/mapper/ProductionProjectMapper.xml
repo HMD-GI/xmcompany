@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xm.mapper.ProductionProjectMapper">
+    
+    <!-- 查询生产项目的基本SQL -->
+    <sql id="baseProjectQuery">
+        SELECT
+            p.id,
+            p.project_name AS projectName,
+            p.status,
+            p.current_quantity AS currentQuantity,
+            p.target_quantity AS targetQuantity,
+            p.product_name AS productName,
+            p.unit,
+            p.start_time AS startTime,
+            p.expected_end_time AS expectedEndTime,
+            p.actual_end_time AS actualEndTime,
+            p.remark,
+            p.create_time AS createTime,
+            p.update_time AS updateTime,
+            ROUND((p.current_quantity * 100.0 / p.target_quantity), 2) AS progressRate
+        FROM
+            production_project p
+    </sql>
+    
+    <!-- 分页查询生产项目信息 -->
+    <select id="selectProjectPage" resultType="com.xm.vo.ProductionProjectVO">
+        <include refid="baseProjectQuery"/>
+        <where>
+            <if test="query != null">
+                <if test="query.projectName != null and query.projectName != ''">
+                    AND p.project_name LIKE CONCAT('%', #{query.projectName}, '%')
+                </if>
+                <if test="query.status != null and query.status != ''">
+                    AND p.status = #{query.status}
+                </if>
+                <if test="query.productName != null and query.productName != ''">
+                    AND p.product_name LIKE CONCAT('%', #{query.productName}, '%')
+                </if>
+            </if>
+        </where>
+        ORDER BY p.update_time DESC
+    </select>
+    
+    <!-- 根据ID查询生产项目详情 -->
+    <select id="selectProjectById" resultType="com.xm.vo.ProductionProjectVO">
+        <include refid="baseProjectQuery"/>
+        WHERE p.id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.mapper.CustomerMapper">
+    <!-- 基础查询SQL片段 -->
+    <sql id="baseCustomerQuery">
+        SELECT
+            so.id,
+            so.name,
+            so.contact_person,
+            so.phone,
+            so.source,
+            so.level,
+            so.status
+        FROM customer so
+        WHERE 1=1
+    </sql>
+
+    <!-- 分页查询客户订单 -->
+    <select id="selectCustomerPage" resultType="com.xm.vo.CustomerVO">
+        <include refid="baseCustomerQuery"/>
+        <if test="query != null">
+            <if test="query.name != null and query.name != ''">
+                AND so.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.contactPerson != null and query.contactPerson != ''">
+                AND so.contact_person LIKE CONCAT('%', #{query.contactPerson}, '%')
+            </if>
+            <if test="query.source != null and query.source != ''">
+                AND so.source LIKE CONCAT('%', #{query.source}, '%')
+            </if>
+            <if test="query.level != null and query.level != ''">
+                AND so.level = #{query.level}
+            </if>
+            <if test="query.status != null and query.level != ''">
+                AND so.status = #{query.status}
+            </if>
+        </if>
+        ORDER BY so.create_time DESC
+    </select>
+</mapper>

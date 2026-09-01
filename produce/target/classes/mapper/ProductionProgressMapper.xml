@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xm.mapper.ProductionProgressMapper">
+    
+    <!-- 查询生产进度记录的基本SQL -->
+    <sql id="baseProgressQuery">
+        SELECT
+            pp.id,
+            pp.project_id AS projectId,
+            p.project_name AS projectName,
+            pp.quantity,
+            pp.before_quantity AS beforeQuantity,
+            pp.after_quantity AS afterQuantity,
+            pp.operator_id AS operatorId,
+            pp.operator_name AS operatorName,
+            pp.remark,
+            pp.operation_time AS operationTime,
+            pp.create_time AS createTime
+        FROM
+            production_progress pp
+        LEFT JOIN
+            production_project p ON pp.project_id = p.id
+    </sql>
+    
+    <!-- 分页查询项目进度记录 -->
+    <select id="selectProgressPage" resultType="com.xm.vo.ProductionProgressVO">
+        <include refid="baseProgressQuery"/>
+        <where>
+            <if test="query != null">
+                <if test="query.projectId != null">
+                    AND pp.project_id = #{query.projectId}
+                </if>
+                <if test="query.projectName != null and query.projectName != ''">
+                    AND p.project_name LIKE CONCAT('%', #{query.projectName}, '%')
+                </if>
+                <if test="query.operatorName != null and query.operatorName != ''">
+                    AND pp.operator_name LIKE CONCAT('%', #{query.operatorName}, '%')
+                </if>
+            </if>
+        </where>
+        ORDER BY pp.operation_time DESC
+    </select>
+    
+    <!-- 根据ID查询进度记录详情 -->
+    <select id="selectProgressById" resultType="com.xm.vo.ProductionProgressVO">
+        <include refid="baseProgressQuery"/>
+        WHERE pp.id = #{id}
+    </select>
+</mapper>

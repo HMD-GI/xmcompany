@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.mapper.EmployeeMapper">
+    <!-- 基础查询SQL片段 -->
+    <sql id="baseEmployeeQuery">
+        SELECT
+            e.id,
+            e.name,
+            e.username,
+            e.role,
+            e.enabled,
+            e.gender
+        FROM employee e
+        WHERE 1=1
+    </sql>
+
+    <!-- 分页查询员工列表 -->
+    <select id="selectEmployeePage" resultType="com.xm.vo.EmployeeVO">
+        <include refid="baseEmployeeQuery"/>
+        <if test="query != null">
+            <if test="query.name != null and query.name != ''">
+                AND e.name LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            <if test="query.gender != null and query.gender != ''">
+                AND e.gender = #{query.gender}
+            </if>
+            <if test="query.role != null and query.role != ''">
+                AND e.role = #{query.role}
+            </if>
+            <if test="query.enabled != null">
+                AND e.enabled = #{query.enabled}
+            </if>
+        </if>
+        ORDER BY e.create_time DESC
+    </select>
+</mapper>
