@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小铭同学 - AI助手测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .chat-container {
+            height: 400px;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+        .message.user {
+            justify-content: flex-end;
+        }
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+        }
+        .user .message-content {
+            background-color: #3498db;
+            color: white;
+        }
+        .assistant .message-content {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+        .input-area {
+            display: flex;
+            padding: 15px;
+        }
+        #message-input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+        }
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        #new-chat-button {
+            background-color: #27ae60;
+        }
+        #new-chat-button:hover {
+            background-color: #219653;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .status {
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            padding: 5px;
+        }
+        .control-area {
+            display: flex;
+            padding: 0 15px 10px;
+            justify-content: flex-end;
+        }
+        .chat-info {
+            color: #777;
+            padding: 5px 15px;
+            font-size: 14px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">小铭同学 - AI助手</div>
+        <div class="chat-info" id="chat-info">对话ID: 1</div>
+        <div class="chat-container" id="chat-container">
+            <div class="message assistant">
+                <div class="message-content">
+                    您好！我是小铭同学，有什么可以帮助您的吗？
+                </div>
+            </div>
+        </div>
+        <div class="status" id="status"></div>
+        <div class="control-area">
+            <button id="new-chat-button" class="button">新建对话</button>
+        </div>
+        <div class="input-area">
+            <input type="text" id="message-input" placeholder="请输入您的问题..." autocomplete="off">
+            <button id="send-button" class="button">发送</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let messageId = 1; // 消息ID，每次新建对话时递增
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const statusIndicator = document.getElementById('status');
+        const newChatButton = document.getElementById('new-chat-button');
+        const chatInfo = document.getElementById('chat-info');
+        
+        // 认证token
+        const authToken = 'eyJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6InhpYW9taW5nIiwiZXhwIjoxNzU2ODAwMzM5fQ.ZAbj_rdLNPfYxDzeL9mMZKK7ue9-adSTKvFq4NCi-EI';
+        
+        // 新建对话
+        function startNewChat() {
+            // 增加消息ID
+            messageId++;
+            
+            // 更新对话ID显示
+            chatInfo.textContent = `对话ID: ${messageId}`;
+            
+            // 清空聊天容器
+            chatContainer.innerHTML = '';
+            
+            // 添加初始欢迎消息
+            const welcomeDiv = document.createElement('div');
+            welcomeDiv.className = 'message assistant';
+            const welcomeContentDiv = document.createElement('div');
+            welcomeContentDiv.className = 'message-content';
+            welcomeContentDiv.textContent = '您好！我是小铭同学，这是新的对话，有什么可以帮助您的吗？';
+            welcomeDiv.appendChild(welcomeContentDiv);
+            chatContainer.appendChild(welcomeDiv);
+            
+            // 清空输入框
+            messageInput.value = '';
+            
+            // 更新状态
+            statusIndicator.textContent = '已开始新对话';
+            setTimeout(() => {
+                statusIndicator.textContent = '';
+            }, 2000);
+        }
+        
+        // 发送消息处理函数
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // 添加用户消息到聊天界面
+            addMessage('user', message);
+            
+            // 清空输入框
+            messageInput.value = '';
+            
+            // 显示加载状态
+            statusIndicator.innerHTML = '<div class="loading"></div> 正在思考...';
+            
+            // 准备接收消息的容器
+            const assistantMessageDiv = document.createElement('div');
+            assistantMessageDiv.className = 'message assistant';
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            assistantMessageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(assistantMessageDiv);
+            
+            // 发送请求到后端
+            fetch('/xm/ai/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'token': authToken // 使用token作为请求头名称
+                },
+                body: JSON.stringify({
+                    messageId: messageId,
+                    content: message
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('服务器响应错误');
+                }
+                
+                statusIndicator.textContent = '正在接收回复...';
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let accumulatedResponse = '';
+                
+                // 处理流式响应
+                function processText({ done, value }) {
+                    if (done) {
+                        statusIndicator.textContent = '';
+                        return;
+                    }
+                    
+                    const text = decoder.decode(value, { stream: true });
+                    accumulatedResponse += text;
+                    contentDiv.textContent = accumulatedResponse;
+                    
+                    // 自动滚动到底部
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                    
+                    // 继续读取流
+                    return reader.read().then(processText);
+                }
+                
+                return reader.read().then(processText);
+            })
+            .catch(error => {
+                console.error('请求出错:', error);
+                statusIndicator.textContent = '请求出错: ' + error.message;
+                // 显示错误消息
+                addMessage('assistant', '抱歉，服务出现了问题，请稍后再试。');
+            });
+        }
+        
+        // 添加消息到聊天界面
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + sender;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = text;
+            
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            // 自动滚动到底部
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // 事件监听器
+        sendButton.addEventListener('click', sendMessage);
+        
+        messageInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 新建对话按钮监听器
+        newChatButton.addEventListener('click', startNewChat);
+    </script>
+</body>
+</html>

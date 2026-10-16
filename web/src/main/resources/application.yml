@@ -1,0 +1,97 @@
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/xmcompany?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:your_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        login-username: ${DRUID_USERNAME:admin}
+        login-password: ${DRUID_PASSWORD:your_password}
+      filter:
+        stat:
+          enabled: true
+        wall:
+          enabled: true
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: ${REDIS_PASSWORD:your_password}
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 100ms
+    mongodb:
+      uri: mongodb://localhost:27017/xmcompany_ai_db
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    mapUnderscoreToCamelCase: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.xm.entity
+  type-handlers-package: com.xm.handler
+
+server:
+  port: 8080
+
+knife4j:
+  enable: false
+  setting:
+    language: zh_cn
+
+#logging:
+##  level:
+##    root: debug
+##    org:
+##      springframework:
+##        context: DEBUG
+##    com.xm: DEBUG
+
+logging:
+  level:
+    root: info                     # 1. 全局默认只打 INFO+
+    org.springframework.context: debug
+    com.xm: debug                  # 2. 自己的业务模块继续 DEBUG
+    org.redisson: warn             # 3. 屏蔽 Redisson 心跳
+    org.mongodb.driver: info       # 4. 屏蔽 MongoDB 集群轮询
+
+#langchain4j模型
+langchain4j:
+  #阿里百炼平台--通义千问
+  community:
+    dashscope:
+      #集成阿里通义千问-通用文本向量-v3
+      embedding-model:
+        api-key: ${DASH_SCOPE_API_KEY}
+        model-name: text-embedding-v3
+      #流式输出模型
+      streaming-chat-model:
+        api-key: ${DASH_SCOPE_API_KEY}
+        model-name: qwen-plus
+#      chat-model:
+#        api-key: ${DASH_SCOPE_API_KEY}
+#        model-name: qwen-max
+  open-ai:
+    chat-model:
+      #DeepSeek
+      base-url: https://api.deepseek.com
+      api-key: ${DEEP_SEEK_API_KEY}
+      #DeepSeek-V3
+      model-name: deepseek-chat
+      temperture: 0.9
+      #请求和响应日志
+      log-requests: true
+      log-responses: true
+
